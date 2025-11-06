@@ -1,0 +1,17 @@
+{
+  "name": "sncl-lsp-server",
+  "version": "1.0.0",
+  "author": "gabrielcsilva1",
+  "license": "MIT",
+  "engines": {
+    "node": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gabrielcsilva1/sncl-language-server"
+  },
+  "dependencies": {
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
+  }
+}

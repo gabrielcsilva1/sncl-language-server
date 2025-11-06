@@ -1,0 +1,37 @@
+{
+  "name": "sncl-language-server",
+  "displayName": "sncl-language-server",
+  "description": "Um servidor de linguagem integrado com o VSCode para a linguagem sNCL (simple NCL).",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.82.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:sncl"
+  ],
+  "main": "client/out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "sncl",
+        "extensions": [
+          ".sncl"
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
+    "pretest": "npm run compile",
+    "postinstall": "cd client && npm install && cd ../server && npm install && cd .."
+  },
+  "devDependencies": {
+    "@types/node": "^22.17.0",
+    "typescript": "^5.6.3"
+  }
+}
