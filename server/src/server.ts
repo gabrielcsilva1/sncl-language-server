@@ -1,40 +1,40 @@
 import {
   createConnection,
-  TextDocuments,
+  type InitializeParams,
+  type InitializeResult,
   ProposedFeatures,
-  InitializeParams,
   TextDocumentSyncKind,
-  InitializeResult,
-} from "vscode-languageserver/node";
+  TextDocuments,
+} from 'vscode-languageserver/node'
 
-import { TextDocument } from "vscode-languageserver-textdocument";
+import { TextDocument } from 'vscode-languageserver-textdocument'
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
-const connection = createConnection(ProposedFeatures.all);
+const connection = createConnection(ProposedFeatures.all)
 
 // Create a simple text document manager.
-const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
+const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
-connection.onInitialize((params: InitializeParams) => {
+connection.onInitialize((_: InitializeParams) => {
   const result: InitializeResult = {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
     },
-  };
+  }
 
-  return result;
-});
+  return result
+})
 
 documents.onDidChangeContent((change) => {
   connection.window.showInformationMessage(
-    "onDidChangeContent: " + change.document.uri
-  );
-});
+    `onDidChangeContent: ${change.document.uri}`
+  )
+})
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
-documents.listen(connection);
+documents.listen(connection)
 
 // Listen on the connection
-connection.listen();
+connection.listen()

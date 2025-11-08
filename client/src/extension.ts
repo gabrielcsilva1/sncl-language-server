@@ -1,20 +1,20 @@
-import * as path from "path";
-import { ExtensionContext } from "vscode";
+import * as path from 'node:path'
+import type { ExtensionContext } from 'vscode'
 
 import {
   LanguageClient,
-  LanguageClientOptions,
-  ServerOptions,
+  type LanguageClientOptions,
+  type ServerOptions,
   TransportKind,
-} from "vscode-languageclient/node";
+} from 'vscode-languageclient/node'
 
-let client: LanguageClient;
+let client: LanguageClient
 
 export function activate(context: ExtensionContext) {
   // The server is implemented in node
   const serverModule = context.asAbsolutePath(
-    path.join("server", "out", "server.js")
-  );
+    path.join('server', 'out', 'server.js')
+  )
 
   // If the extension is launched in debug mode then the debug server options are used
   // Otherwise the run options are used
@@ -24,33 +24,33 @@ export function activate(context: ExtensionContext) {
       module: serverModule,
       transport: TransportKind.ipc,
     },
-  };
+  }
 
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for all documents by default
-    documentSelector: [{ scheme: "file", language: "sncl" }],
+    documentSelector: [{ scheme: 'file', language: 'sncl' }],
     synchronize: {
       // Notify the server about file changes to '.clientrc files contained in the workspace
       // fileEvents: workspace.createFileSystemWatcher("**/.snclrc"),
     },
-  };
+  }
 
   // Create the language client and start the client.
   client = new LanguageClient(
-    "sncl-language-server",
-    "sNCL language server",
+    'sncl-language-server',
+    'sNCL language server',
     serverOptions,
     clientOptions
-  );
+  )
 
   // Start the client. This will also launch the server
-  client.start();
+  client.start()
 }
 
 export function deactivate(): Thenable<void> | undefined {
   if (!client) {
-    return undefined;
+    return undefined
   }
-  return client.stop();
+  return client.stop()
 }
