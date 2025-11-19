@@ -1,4 +1,3 @@
-
 /**
  * Interface base para todos os nós da Árvore de Sintaxe Abstrata (AST)
  */
@@ -22,7 +21,9 @@ export interface Location {
 }
 
 // Uma interface genérica para representar uma referência.
-export interface Reference<T extends AstNode = AstNode>{
+export interface Reference<T extends AstNode = AstNode> {
+  $type: 'Reference'
+
   /** O identificador do nó */
   $name: string
 

@@ -40,8 +40,9 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       return this.visit(children.port)
     }
 
-    // TODO: Implementar tratamento de erro.
-    throw new Error(`SnclVisitor.declaration possui uma declaração não implementada: ${children}`)
+    throw new Error(
+      `SnclVisitor.declaration possui uma declaração não implementada: ${children}`
+    )
   }
 
   region(children: RegionCstChildren): ast.Region {
@@ -67,6 +68,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
 
       if (node.key === 'rg') {
         rgRef = {
+          $type: 'Reference',
           $name: node.value.value,
           // O campo 'ref' será preenchido pelo Linker
           location: node.value.location,
@@ -94,6 +96,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       name: portName,
       // O campo 'ref' será preenchido pelo Linker
       media: {
+        $type: 'Reference',
         $name: mediaName,
         location: getLocationFromToken(children.Identifier[1]),
       },
@@ -125,4 +128,4 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
   }
 }
 
-export const snclVisitor = new SnclVisitor()
+export const sNCLVisitor = new SnclVisitor()

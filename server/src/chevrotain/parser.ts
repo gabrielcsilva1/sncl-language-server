@@ -25,7 +25,7 @@ export class SnclParser extends CstParser {
     this.OR([
       { ALT: () => this.SUBRULE(this.region) },
       { ALT: () => this.SUBRULE(this.media) },
-      { ALT: () => this.SUBRULE(this.port) }
+      { ALT: () => this.SUBRULE(this.port) },
     ])
   })
 

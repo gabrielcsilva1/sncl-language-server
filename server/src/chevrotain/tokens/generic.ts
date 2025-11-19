@@ -1,7 +1,9 @@
 import { createToken, Lexer } from 'chevrotain'
 import { Value } from './literals'
 
-export const identifierPattern = /[a-zA-Z_]\w*/
+const identifierPattern = /[a-zA-Z_]\w*/
+
+export const identifierPatternExact = new RegExp(`^${identifierPattern.source}$`)
 
 export const Identifier = createToken({
   name: 'Identifier',
