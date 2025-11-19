@@ -13,7 +13,8 @@
 	},
 	"formatter": {
 		"enabled": true,
-		"useEditorconfig": true
+		"useEditorconfig": true,
+		"lineWidth": 95
 	},
 	"linter": {
 		"enabled": true,
