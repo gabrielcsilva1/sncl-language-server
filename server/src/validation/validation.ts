@@ -3,51 +3,45 @@ import { identifierPatternExact } from '../chevrotain/tokens/generic'
 import type { ValidationError } from '../parser/parser'
 import type { SnclDocument } from '../workspace/document'
 
-export interface IDocumentValidator {
-  validate(document: SnclDocument): void
+export function validateDocument(document: SnclDocument): void {
+  const errors: ValidationError[] = []
+
+  errors.push(...validateDuplicates(document.parseResult.value))
+  errors.push(...validateDeclaration(document))
+
+  document.parseResult.errors.push(...errors)
 }
 
-export class DocumentValidator implements IDocumentValidator {
-  validate(document: SnclDocument): void {
-    const errors: ValidationError[] = []
+function validateDuplicates(program: ast.Program): ValidationError[] {
+  const errors: ValidationError[] = []
 
-    errors.push(...this.validateDuplicates(document.parseResult.value))
-    errors.push(...this.validateDeclaration(document))
+  const declaredElements = new Map<string, ast.Declaration>()
 
-    document.parseResult.parseErrors.push(...errors)
-  }
-
-  private validateDuplicates(program: ast.Program): ValidationError[] {
-    const errors: ValidationError[] = []
-
-    const declaredElements = new Map<string, ast.Declaration>()
-
-    for (const declaration of program.declarations) {
-      if (declaredElements.has(declaration.name)) {
-        errors.push({
-          message: `Duplicated identifier: ${declaration.name}`,
-          location: declaration.location,
-        })
-      } else {
-        declaredElements.set(declaration.name, declaration)
-      }
+  for (const declaration of program.declarations) {
+    if (declaredElements.has(declaration.name)) {
+      errors.push({
+        message: `Duplicated identifier: ${declaration.name}`,
+        location: declaration.location,
+      })
+    } else {
+      declaredElements.set(declaration.name, declaration)
     }
-
-    return errors
   }
 
-  private validateDeclaration(document: SnclDocument): ValidationError[] {
-    const errors: ValidationError[] = []
+  return errors
+}
 
-    for (const declaration of document.parseResult.value.declarations) {
-      if (declaration.$type === 'Media') {
-        errors.push(...validate.Media(declaration))
-      } else if (declaration.$type === 'Port') {
-        errors.push(...validate.Port(declaration))
-      }
+function validateDeclaration(document: SnclDocument): ValidationError[] {
+  const errors: ValidationError[] = []
+
+  for (const declaration of document.parseResult.value.declarations) {
+    if (declaration.$type === 'Media') {
+      errors.push(...validate.Media(declaration))
+    } else if (declaration.$type === 'Port') {
+      errors.push(...validate.Port(declaration))
     }
-    return errors
   }
+  return errors
 }
 
 const validate = {

@@ -1,4 +1,3 @@
-import type { Optional } from '../@types/optional'
 import type * as ast from '../@types/sncl-types'
 import type {
   DeclarationCstChildren,
@@ -22,7 +21,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
     this.validateVisitor()
   }
 
-  program(children: ProgramCstChildren): Optional<ast.Program, 'location'> {
+  program(children: ProgramCstChildren): Omit<ast.Program, 'location'> {
     const declarations = children.declaration?.map((decl) => this.visit(decl)) || []
 
     return {

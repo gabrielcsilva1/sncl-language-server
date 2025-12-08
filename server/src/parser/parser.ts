@@ -1,4 +1,3 @@
-import type { Optional } from '../@types/optional'
 import type { Program } from '../@types/sncl-types'
 import { sNCLParser } from '../chevrotain/parser'
 import { sNCLLexer } from '../chevrotain/tokens'
@@ -8,7 +7,7 @@ import { getValidationErrorFromParser, getValidationErrorsFromLexing } from '../
 
 export interface ParseResult<T = AstNode> {
   value: T
-  parseErrors: ValidationError[]
+  errors: ValidationError[]
 }
 
 export interface ValidationError {
@@ -22,36 +21,37 @@ export interface IDocumentParser {
 
 export class DocumentParser implements IDocumentParser {
   parse(text: string): ParseResult<Program> {
-    const parseErrors: ValidationError[] = []
+    const validationErrors: ValidationError[] = []
 
     // 1 - Gera os tokens
     const lexingResult = sNCLLexer.tokenize(text)
 
-    parseErrors.push(...getValidationErrorsFromLexing(lexingResult.errors))
+    validationErrors.push(...getValidationErrorsFromLexing(lexingResult.errors))
 
     // 2 - Realiza o parsing
     sNCLParser.input = lexingResult.tokens
 
     const cst = sNCLParser.program()
 
-    parseErrors.push(...getValidationErrorFromParser(sNCLParser.errors, text.length))
+    validationErrors.push(...getValidationErrorFromParser(sNCLParser.errors, text.length))
 
     // 3 - Gera a AST do resultado da fase de parsing
-    let astResult = sNCLVisitor.visit(cst) as Optional<Program, 'location'> | undefined
+    let astResult = sNCLVisitor.visit(cst) as Omit<Program, 'location'> | undefined
 
     if (!astResult) {
       astResult = getEmptyProgram(text.length)
     }
 
+    // Preenche a location
     const parseResult: ParseResult<Program> = {
       value: {
         ...astResult,
         location: {
           startOffset: 0,
-          endOffset: text.length,
+          endOffset: text.length - 1,
         },
       },
-      parseErrors: parseErrors,
+      errors: validationErrors,
     }
 
     return parseResult
@@ -64,7 +64,7 @@ function getEmptyProgram(length: number): Program {
     declarations: [],
     location: {
       startOffset: 0,
-      endOffset: length,
+      endOffset: length - 1,
     },
   }
 }

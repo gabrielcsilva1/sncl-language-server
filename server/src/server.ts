@@ -38,7 +38,7 @@ documents.onDidChangeContent((change) => {
     change.document.getText()
   )
 
-  const diagnostics = document.parseResult.parseErrors.map((error) =>
+  const diagnostics = document.parseResult.errors.map((error) =>
     convertErrorToDiagnostic(error, change.document)
   )
 

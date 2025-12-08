@@ -1,5 +1,7 @@
 import type { Program } from '../@types/sncl-types'
 import { DocumentParser, type IDocumentParser, type ParseResult } from '../parser/parser'
+import { link } from '../references/linker'
+import { validateDocument } from '../validation/validation'
 
 export interface SnclDocument {
   /** A URI do documento */
@@ -10,24 +12,10 @@ export interface SnclDocument {
 
   /** O resultado do parser, pode conter os erros de parser/lexer */
   parseResult: ParseResult<Program>
-
-  /** O estado atual do documento. */
-  state: DocumentState
-}
-
-export enum DocumentState {
-  /** O documento foi alterado, mas nenhum processamento foi feito ainda. */
-  Changed = 0,
-  /** O texto foi analisado (parsing) e o AST foi gerado. */
-  Parsed = 1,
-  /** As referências (links) da AST foram resolvidas. */
-  Linked = 2,
-  /** As validações semânticas foram realizadas */
-  Validated = 3,
 }
 
 /**
- * Serviço responsável por criar instâncias de `SnclDocument`.
+ * Serviço responsável por criar e atualizar instâncias de `SnclDocument`.
  */
 export interface ISnclDocumentFactory {
   /**
@@ -38,8 +26,8 @@ export interface ISnclDocumentFactory {
   from(uri: string, text: string): SnclDocument
 
   /**
-   * Atualiza o estado do documento, efetua o parsing do texto
-   * caso o texto tenha sido alterado.
+   * Atualiza o estado do documento, efetua o parsing, linking e
+   * validação caso o texto tenha sido alterado.
    * @param document - `SnclDocument` documento alterado.
    * @param newText - novo texto do documento.
    */
@@ -58,19 +46,23 @@ export class SnclDocumentFactory implements ISnclDocumentFactory {
       uri,
       text,
       parseResult: this.parserService.parse(text),
-      state: DocumentState.Parsed,
     }
 
     return document
   }
 
   update(document: SnclDocument, newText: string): SnclDocument {
+    // 1. Parsing
     if (document.text !== newText) {
       document.text = newText
       document.parseResult = this.parserService.parse(newText)
     }
 
-    document.state = DocumentState.Parsed
+    // 2. Linking
+    link(document)
+
+    // 3. Validação
+    validateDocument(document)
 
     return document
   }

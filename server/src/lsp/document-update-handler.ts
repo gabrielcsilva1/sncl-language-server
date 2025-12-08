@@ -1,22 +1,22 @@
 import type { SnclDocument } from '../workspace/document'
-import { DocumentBuilder, type IDocumentBuilder } from '../workspace/document-builder'
+import { type IWorkspaceManager, WorkspaceManager } from '../workspace/workspace-manager'
 
 export class DocumentUpdateHandler {
-  private readonly documentBuilder: IDocumentBuilder
+  private readonly workspaceManager: IWorkspaceManager
 
   constructor() {
-    this.documentBuilder = new DocumentBuilder()
+    this.workspaceManager = new WorkspaceManager()
   }
 
   onDocumentOpened(uri: string, text: string): SnclDocument {
-    return this.documentBuilder.update(uri, text)
+    return this.workspaceManager.update(uri, text)
   }
 
   onDocumentChanged(uri: string, newText: string) {
-    return this.documentBuilder.update(uri, newText)
+    return this.workspaceManager.update(uri, newText)
   }
 
   onDocumentDeleted(uri: string) {
-    this.documentBuilder.delete(uri)
+    this.workspaceManager.delete(uri)
   }
 }
