@@ -2,7 +2,7 @@ import { SymbolTable } from '../symbol-table'
 import type { SnclDocument } from '../workspace/document'
 
 export function link(document: SnclDocument): void {
-  const symbolTable = SymbolTable.from(document.parseResult.value)
+  const symbolTable = document.symbolTable
 
   const program = document.parseResult.value
 

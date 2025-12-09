@@ -1,6 +1,7 @@
 import type { Program } from '../@types/sncl-types'
 import { DocumentParser, type IDocumentParser, type ParseResult } from '../parser/parser'
 import { link } from '../references/linker'
+import { SymbolTable } from '../symbol-table'
 import { validateDocument } from '../validation/validation'
 
 export interface SnclDocument {
@@ -12,6 +13,8 @@ export interface SnclDocument {
 
   /** O resultado do parser, pode conter os erros de parser/lexer */
   parseResult: ParseResult<Program>
+
+  symbolTable: SymbolTable
 }
 
 /**
@@ -23,7 +26,7 @@ export interface ISnclDocumentFactory {
    * @param uri - uri do documento.
    * @param text - texto do documento.
    */
-  from(uri: string, text: string): SnclDocument
+  createFrom(uri: string, text: string): SnclDocument
 
   /**
    * Atualiza o estado do documento, efetua o parsing, linking e
@@ -41,11 +44,16 @@ export class SnclDocumentFactory implements ISnclDocumentFactory {
     this.parserService = new DocumentParser()
   }
 
-  from(uri: string, text: string): SnclDocument {
+  createFrom(uri: string, text: string): SnclDocument {
+    const parseResult = this.parserService.parse(text)
+    const symbolTable = new SymbolTable()
+    symbolTable.update(parseResult.value)
+
     const document: SnclDocument = {
       uri,
       text,
-      parseResult: this.parserService.parse(text),
+      parseResult: parseResult,
+      symbolTable: symbolTable,
     }
 
     return document
@@ -56,6 +64,7 @@ export class SnclDocumentFactory implements ISnclDocumentFactory {
     if (document.text !== newText) {
       document.text = newText
       document.parseResult = this.parserService.parse(newText)
+      document.symbolTable.update(document.parseResult.value)
     }
 
     // 2. Linking

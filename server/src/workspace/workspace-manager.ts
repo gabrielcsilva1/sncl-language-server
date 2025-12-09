@@ -31,7 +31,7 @@ export class WorkspaceManager implements IWorkspaceManager {
     let document = this.snclDocuments.get(uri)
 
     if (document === undefined) {
-      document = this.documentFactory.from(uri, text)
+      document = this.documentFactory.createFrom(uri, text)
     }
 
     this.documentFactory.update(document, text)

@@ -2,6 +2,7 @@ import type { Program } from '../@types/sncl-types'
 import { sNCLParser } from '../chevrotain/parser'
 import { sNCLLexer } from '../chevrotain/tokens'
 import { sNCLVisitor } from '../chevrotain/visitor'
+import type { SymbolTable } from '../symbol-table'
 import type { AstNode, Location } from '../syntax-tree'
 import { getValidationErrorFromParser, getValidationErrorsFromLexing } from '../utils/utils'
 

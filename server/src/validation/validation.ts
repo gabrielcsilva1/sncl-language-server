@@ -6,29 +6,10 @@ import type { SnclDocument } from '../workspace/document'
 export function validateDocument(document: SnclDocument): void {
   const errors: ValidationError[] = []
 
-  errors.push(...validateDuplicates(document.parseResult.value))
+  errors.push(...document.symbolTable.duplicateErrors)
   errors.push(...validateDeclaration(document))
 
   document.parseResult.errors.push(...errors)
-}
-
-function validateDuplicates(program: ast.Program): ValidationError[] {
-  const errors: ValidationError[] = []
-
-  const declaredElements = new Map<string, ast.Declaration>()
-
-  for (const declaration of program.declarations) {
-    if (declaredElements.has(declaration.name)) {
-      errors.push({
-        message: `Duplicated identifier: ${declaration.name}`,
-        location: declaration.location,
-      })
-    } else {
-      declaredElements.set(declaration.name, declaration)
-    }
-  }
-
-  return errors
 }
 
 function validateDeclaration(document: SnclDocument): ValidationError[] {

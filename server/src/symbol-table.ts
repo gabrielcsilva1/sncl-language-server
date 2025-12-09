@@ -1,23 +1,43 @@
 import type * as ast from './@types/sncl-types'
+import type { ValidationError } from './parser/parser'
 
 export class SymbolTable {
   private elements: Map<string, ast.Declaration>
+  private _duplicateErrors: ValidationError[] = []
 
-  protected constructor() {
+  public constructor() {
     this.elements = new Map<string, ast.Declaration>()
+  }
+
+  update(program: ast.Program) {
+    this.clear()
+
+    for (const declaration of program.declarations) {
+      this.addElement(declaration)
+    }
+  }
+
+  public addElement(element: ast.Declaration) {
+    if (this.elements.get(element.name)) {
+      this._duplicateErrors.push({
+        message: `Duplicated identifier: ${element.name}`,
+        location: element.location,
+      })
+    }
+
+    this.elements.set(element.name, element)
   }
 
   public getElement(name: string) {
     return this.elements.get(name)
   }
 
-  static from(program: ast.Program): SymbolTable {
-    const symbolTable = new SymbolTable()
+  public clear() {
+    this.elements.clear()
+    this._duplicateErrors = []
+  }
 
-    for (const declaration of program.declarations) {
-      symbolTable.elements.set(declaration.name, declaration)
-    }
-
-    return symbolTable
+  get duplicateErrors() {
+    return this._duplicateErrors
   }
 }

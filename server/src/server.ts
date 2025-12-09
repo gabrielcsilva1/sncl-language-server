@@ -31,8 +31,6 @@ connection.onInitialize((_: InitializeParams) => {
 })
 
 documents.onDidChangeContent((change) => {
-  connection.window.showInformationMessage(`onDidChangeContent: ${change.document.uri}`)
-
   const document = workspaceManager.onDocumentChanged(
     change.document.uri,
     change.document.getText()
