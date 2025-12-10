@@ -14,6 +14,17 @@ export class SymbolTable {
 
     for (const declaration of program.declarations) {
       this.addElement(declaration)
+
+      if (declaration.$type === 'Region') {
+        this.updateNodeRecursive(declaration.children)
+      }
+    }
+  }
+
+  private updateNodeRecursive(nodeList: ast.Region[]) {
+    for (const node of nodeList) {
+      this.addElement(node)
+      this.updateNodeRecursive(node.children)
     }
   }
 

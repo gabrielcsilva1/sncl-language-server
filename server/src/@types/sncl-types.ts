@@ -12,6 +12,7 @@ export type Declaration = Region | Media | Port
 export interface Region extends AstNode {
   $type: 'Region'
   name: string
+  children: Region[]
   properties: Property[]
 }
 

@@ -34,7 +34,10 @@ export class SnclParser extends CstParser {
     this.CONSUME(Identifier)
 
     this.MANY(() => {
-      this.SUBRULE(this.property)
+      this.OR([
+        { ALT: () => this.SUBRULE(this.property) },
+        { ALT: () => this.SUBRULE(this.region) },
+      ])
     })
 
     this.CONSUME(End)

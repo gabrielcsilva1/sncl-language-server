@@ -48,10 +48,12 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
     const name = children.Identifier[0].image
 
     const properties = (children.property || []).map((prop) => this.visit(prop))
+    const regions = (children.region || []).map((region) => this.visit(region))
 
     return {
       $type: 'Region',
       name,
+      children: regions,
       properties,
       location: getLocationFromToken(children.Region[0], children.End[0]),
     }
