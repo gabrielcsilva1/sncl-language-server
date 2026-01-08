@@ -2,11 +2,11 @@ import type * as ast from './@types/sncl-types'
 import type { ValidationError } from './parser/parser'
 
 export class SymbolTable {
-  private elements: Map<string, ast.Declaration>
+  private elements: Map<string | number, ast.Declaration>
   private _duplicateErrors: ValidationError[] = []
 
   public constructor() {
-    this.elements = new Map<string, ast.Declaration>()
+    this.elements = new Map()
   }
 
   update(program: ast.Program) {
@@ -29,7 +29,11 @@ export class SymbolTable {
   }
 
   public addElement(element: ast.Declaration) {
-    if (this.elements.get(element.name)) {
+    if (element.$type === 'Link') {
+      const length = this.elements.size
+      this.elements.set(length, element)
+      return
+    } else if (this.elements.get(element.name)) {
       this._duplicateErrors.push({
         message: `Duplicated identifier: ${element.name}`,
         location: element.location,

@@ -20,6 +20,8 @@ function validateDeclaration(document: SnclDocument): ValidationError[] {
       errors.push(...validate.Media(declaration))
     } else if (declaration.$type === 'Port') {
       errors.push(...validate.Port(declaration))
+    } else if (declaration.$type === 'Link') {
+      errors.push(...validate.Link(declaration))
     }
   }
   return errors
@@ -57,6 +59,30 @@ const validate = {
         message: `Reference to undefined media: '${port.media.$name}'.`,
         location: port.media.location,
       })
+    }
+
+    return errors
+  },
+
+  Link: (link: ast.Link) => {
+    const errors: ValidationError[] = []
+
+    for (const bind of link.conditions) {
+      if (bind.component.$ref === undefined) {
+        errors.push({
+          message: `Reference to undefined media: '${bind.component.$name}'.`,
+          location: bind.component.location,
+        })
+      }
+    }
+
+    for (const bind of link.actions) {
+      if (bind.component.$ref === undefined) {
+        errors.push({
+          message: `Reference to undefined media: '${bind.component.$name}'.`,
+          location: bind.component.location,
+        })
+      }
     }
 
     return errors

@@ -1,7 +1,10 @@
 import type * as ast from '../@types/sncl-types'
 import type {
+  ActionCstChildren,
+  ConditionCstChildren,
   DeclarationCstChildren,
   ISnclNodeVisitor,
+  LinkCstChildren,
   MediaCstChildren,
   PortCstChildren,
   ProgramCstChildren,
@@ -22,7 +25,9 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
   }
 
   program(children: ProgramCstChildren): Omit<ast.Program, 'location'> {
-    const declarations = children.declaration?.map((decl) => this.visit(decl)) || []
+    const declarations = (children.declaration || [])
+      .map((decl) => this.visit(decl))
+      .filter((decl) => decl !== undefined) // Pode ser undefined para declarações não implementadas
 
     return {
       $type: 'Program',
@@ -30,18 +35,18 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
     }
   }
 
-  declaration(children: DeclarationCstChildren): ast.Declaration {
+  declaration(children: DeclarationCstChildren): ast.Declaration | undefined {
     if (children.region) {
       return this.visit(children.region)
     } else if (children.media) {
       return this.visit(children.media)
     } else if (children.port) {
       return this.visit(children.port)
+    } else if (children.link) {
+      return this.visit(children.link)
     }
 
-    throw new Error(
-      `SnclVisitor.declaration possui uma declaração não implementada: ${children}`
-    )
+    return
   }
 
   region(children: RegionCstChildren): ast.Region {
@@ -102,6 +107,57 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
         location: getLocationFromToken(children.Identifier[1]),
       },
       location: getLocationFromToken(children.Port[0], children.Identifier[1]),
+    }
+  }
+
+  link(children: LinkCstChildren): ast.Link {
+    const conditions = children.condition.map((condition) => this.visit(condition))
+    const actions = children.action?.map((action) => this.visit(action)) || []
+    const properties = children.property?.map((prop) => this.visit(prop)) || []
+
+    return {
+      $type: 'Link',
+      conditions,
+      actions,
+      properties,
+      location: getLocationFromToken(
+        children.condition[0].children.Condition[0],
+        children.End[0]
+      ),
+    }
+  }
+
+  condition(children: ConditionCstChildren): ast.Condition {
+    const role = children.Condition[0].image
+    const componentId = children.Identifier[0].image
+
+    return {
+      $type: 'Condition',
+      role,
+      component: {
+        $type: 'Reference',
+        $name: componentId,
+        location: getLocationFromToken(children.Identifier[0]),
+      },
+      location: getLocationFromToken(children.Condition[0], children.Identifier[0]),
+    }
+  }
+
+  action(children: ActionCstChildren): ast.Action {
+    const role = children.Action[0].image
+    const componentId = children.Identifier[0].image
+    const properties = (children.property || []).map((prop) => this.visit(prop))
+
+    return {
+      $type: 'Action',
+      role,
+      properties,
+      component: {
+        $type: 'Reference',
+        $name: componentId,
+        location: getLocationFromToken(children.Identifier[0]),
+      },
+      location: getLocationFromToken(children.Action[0], children.End[0]),
     }
   }
 

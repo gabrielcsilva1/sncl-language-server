@@ -1,6 +1,15 @@
 import { Lexer } from 'chevrotain'
 import { Identifier, WhiteSpaces } from './generic'
-import { End, Media, Port, Region } from './keywords'
+import {
+  Action,
+  Condition,
+  ConditionSeparator,
+  Do,
+  End,
+  Media,
+  Port,
+  Region,
+} from './keywords'
 import { NumberLiteral, StringLiteral, Value } from './literals'
 import { Colon } from './symbols'
 
@@ -12,6 +21,10 @@ export const allTokens = [
   Media,
   Port,
   Region,
+  Condition,
+  Action,
+  Do,
+  ConditionSeparator,
   // Símbolos e literais
   Colon,
   NumberLiteral,

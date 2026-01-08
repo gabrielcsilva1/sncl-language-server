@@ -28,6 +28,7 @@ export type DeclarationCstChildren = {
   region?: RegionCstNode[]
   media?: MediaCstNode[]
   port?: PortCstNode[]
+  link?: LinkCstNode[]
 }
 
 export interface RegionCstNode extends CstNode {
@@ -65,6 +66,42 @@ export type PortCstChildren = {
   Identifier: IToken[]
 }
 
+export interface LinkCstNode extends CstNode {
+  name: 'link'
+  children: LinkCstChildren
+}
+
+export type LinkCstChildren = {
+  condition: ConditionCstNode[]
+  ConditionSeparator?: IToken[]
+  Do: IToken[]
+  property?: PropertyCstNode[]
+  action?: ActionCstNode[]
+  End: IToken[]
+}
+
+export interface ConditionCstNode extends CstNode {
+  name: 'condition'
+  children: ConditionCstChildren
+}
+
+export type ConditionCstChildren = {
+  Condition: IToken[]
+  Identifier: IToken[]
+}
+
+export interface ActionCstNode extends CstNode {
+  name: 'action'
+  children: ActionCstChildren
+}
+
+export type ActionCstChildren = {
+  Action: IToken[]
+  Identifier: IToken[]
+  property?: PropertyCstNode[]
+  End: IToken[]
+}
+
 export interface PropertyCstNode extends CstNode {
   name: 'property'
   children: PropertyCstChildren
@@ -91,6 +128,9 @@ export interface ISnclNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   region(children: RegionCstChildren, param?: IN): OUT
   media(children: MediaCstChildren, param?: IN): OUT
   port(children: PortCstChildren, param?: IN): OUT
+  link(children: LinkCstChildren, param?: IN): OUT
+  condition(children: ConditionCstChildren, param?: IN): OUT
+  action(children: ActionCstChildren, param?: IN): OUT
   property(children: PropertyCstChildren, param?: IN): OUT
   value(children: ValueCstChildren, param?: IN): OUT
 }

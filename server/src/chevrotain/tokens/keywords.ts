@@ -24,3 +24,27 @@ export const Region = createToken({
   pattern: /region/,
   longer_alt: Identifier,
 })
+
+export const Condition = createToken({
+  name: 'Condition',
+  pattern: /onBegin|onEnd|onSelection/,
+  longer_alt: Identifier,
+})
+
+export const Action = createToken({
+  name: 'Action',
+  pattern: /start|stop|set|abort/,
+  longer_alt: Identifier,
+})
+
+export const Do = createToken({
+  name: 'Do',
+  pattern: /do/,
+  longer_alt: Identifier,
+})
+
+export const ConditionSeparator = createToken({
+  name: 'ConditionSeparator',
+  pattern: /AND|OR/,
+  longer_alt: Identifier,
+})
