@@ -11,20 +11,16 @@ export class SymbolTable {
 
   update(program: ast.Program) {
     this.clear()
-
-    for (const declaration of program.declarations) {
-      this.addElement(declaration)
-
-      if (declaration.$type === 'Region') {
-        this.updateNodeRecursive(declaration.children)
-      }
-    }
+    this.updateRecursive(program.declarations)
   }
 
-  private updateNodeRecursive(nodeList: ast.Region[]) {
-    for (const node of nodeList) {
-      this.addElement(node)
-      this.updateNodeRecursive(node.children)
+  private updateRecursive(elements: Array<ast.Declaration>) {
+    for (const element of elements) {
+      this.addElement(element)
+
+      if (element.$type === 'Region' || element.$type === 'Context') {
+        this.updateRecursive(element.children)
+      }
     }
   }
 

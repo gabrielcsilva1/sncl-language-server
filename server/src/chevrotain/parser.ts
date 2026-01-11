@@ -5,6 +5,7 @@ import {
   Action,
   Condition,
   ConditionSeparator,
+  Context,
   Do,
   End,
   Media,
@@ -12,7 +13,7 @@ import {
   Region,
 } from './tokens/keywords'
 import { Value } from './tokens/literals'
-import { Colon } from './tokens/symbols'
+import { Colon, Dot } from './tokens/symbols'
 
 export class SnclParser extends CstParser {
   constructor() {
@@ -35,6 +36,7 @@ export class SnclParser extends CstParser {
       { ALT: () => this.SUBRULE(this.region) },
       { ALT: () => this.SUBRULE(this.media) },
       { ALT: () => this.SUBRULE(this.port) },
+      { ALT: () => this.SUBRULE(this.context) },
       { ALT: () => this.SUBRULE(this.link) },
     ])
   })
@@ -68,6 +70,27 @@ export class SnclParser extends CstParser {
     this.CONSUME(Port)
     this.CONSUME1(Identifier)
     this.CONSUME2(Identifier)
+
+    this.OPTION(() => {
+      this.CONSUME(Dot)
+      this.CONSUME3(Identifier)
+    })
+  })
+
+  private context = this.RULE('context', () => {
+    this.CONSUME(Context)
+    this.CONSUME(Identifier)
+
+    this.MANY(() => {
+      this.OR([
+        { ALT: () => this.SUBRULE(this.port) },
+        { ALT: () => this.SUBRULE(this.media) },
+        { ALT: () => this.SUBRULE(this.link) },
+        { ALT: () => this.SUBRULE(this.context) },
+      ])
+    })
+
+    this.CONSUME(End)
   })
 
   private link = this.RULE('link', () => {
@@ -92,12 +115,22 @@ export class SnclParser extends CstParser {
 
   private condition = this.RULE('condition', () => {
     this.CONSUME(Condition)
-    this.CONSUME(Identifier)
+    this.CONSUME1(Identifier)
+
+    this.OPTION(() => {
+      this.CONSUME(Dot)
+      this.CONSUME2(Identifier)
+    })
   })
 
   private action = this.RULE('action', () => {
     this.CONSUME(Action)
-    this.CONSUME(Identifier)
+    this.CONSUME1(Identifier)
+
+    this.OPTION(() => {
+      this.CONSUME(Dot)
+      this.CONSUME2(Identifier)
+    })
 
     this.MANY(() => {
       this.SUBRULE(this.property)

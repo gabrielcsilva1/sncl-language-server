@@ -1,6 +1,12 @@
 import { createToken } from 'chevrotain'
 import { Identifier } from './generic'
 
+export const Context = createToken({
+  name: 'Context',
+  pattern: /context/,
+  longer_alt: Identifier,
+})
+
 export const End = createToken({
   name: 'End',
   pattern: /end(?!\s*:)/,

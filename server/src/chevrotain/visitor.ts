@@ -2,6 +2,7 @@ import type * as ast from '../@types/sncl-types'
 import type {
   ActionCstChildren,
   ConditionCstChildren,
+  ContextCstChildren,
   DeclarationCstChildren,
   ISnclNodeVisitor,
   LinkCstChildren,
@@ -13,7 +14,7 @@ import type {
   ValueCstChildren,
 } from '../chevrotain/generated/cst-types'
 import type { Reference } from '../syntax-tree'
-import { getLocationFromToken } from '../utils/utils'
+import { getLocationFromToken, getReference } from '../utils/utils'
 import { sNCLParser } from './parser'
 
 const BaseCstVisitor = sNCLParser.getBaseCstVisitorConstructor()
@@ -44,6 +45,8 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       return this.visit(children.port)
     } else if (children.link) {
       return this.visit(children.link)
+    } else if (children.context) {
+      return this.visit(children.context)
     }
 
     return
@@ -94,20 +97,47 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
   }
 
   port(children: PortCstChildren): ast.Port {
-    const portName = children.Identifier[0].image
-    const mediaName = children.Identifier[1].image
+    const portId = children.Identifier[0].image
+    const componentId = children.Identifier[1].image
+
+    const iface = children.Dot && getReference<ast.Port>(children.Identifier[2])
 
     return {
       $type: 'Port',
-      name: portName,
+      name: portId,
       // O campo 'ref' será preenchido pelo Linker
-      media: {
+      component: {
         $type: 'Reference',
-        $name: mediaName,
+        $name: componentId,
         location: getLocationFromToken(children.Identifier[1]),
       },
+      interface: iface,
       location: getLocationFromToken(children.Port[0], children.Identifier[1]),
     }
+  }
+
+  context(children: ContextCstChildren): ast.Context {
+    const element: ast.Context = {
+      $type: 'Context',
+      children: [],
+      name: '',
+      location: getLocationFromToken(children.Context[0], children.End[0]),
+    }
+
+    element.name = children.Identifier[0].image
+
+    const ports = children.port?.map((port) => this.visit(port)) || []
+    const medias = children.media?.map((media) => this.visit(media)) || []
+    const contexts = children.context?.map((context) => this.visit(context)) || []
+    const links = children.link?.map((link) => this.visit(link)) || []
+
+    element.children = [...ports, ...medias, ...contexts, ...links]
+
+    element.children.forEach((son) => {
+      son.$container = element
+    })
+
+    return element
   }
 
   link(children: LinkCstChildren): ast.Link {
@@ -131,6 +161,8 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
     const role = children.Condition[0].image
     const componentId = children.Identifier[0].image
 
+    const iface = children.Dot && getReference<ast.Port>(children.Identifier[1])
+
     return {
       $type: 'Condition',
       role,
@@ -139,6 +171,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
         $name: componentId,
         location: getLocationFromToken(children.Identifier[0]),
       },
+      interface: iface,
       location: getLocationFromToken(children.Condition[0], children.Identifier[0]),
     }
   }
@@ -147,6 +180,8 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
     const role = children.Action[0].image
     const componentId = children.Identifier[0].image
     const properties = (children.property || []).map((prop) => this.visit(prop))
+
+    const iface = children.Dot && getReference<ast.Port>(children.Identifier[2])
 
     return {
       $type: 'Action',
@@ -157,6 +192,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
         $name: componentId,
         location: getLocationFromToken(children.Identifier[0]),
       },
+      interface: iface,
       location: getLocationFromToken(children.Action[0], children.End[0]),
     }
   }

@@ -54,12 +54,14 @@ const validate = {
   Port: (port: ast.Port) => {
     const errors: ValidationError[] = []
 
-    if (!port.media.$ref) {
+    if (!port.component.$ref) {
       errors.push({
-        message: `Reference to undefined media: '${port.media.$name}'.`,
-        location: port.media.location,
+        message: `Reference to undefined media or context: '${port.component.$name}'.`,
+        location: port.component.location,
       })
     }
+
+    // TODO: Validar interface. Primeiro deve resolver o link.
 
     return errors
   },
@@ -67,10 +69,12 @@ const validate = {
   Link: (link: ast.Link) => {
     const errors: ValidationError[] = []
 
+    // TODO: Validar interface para Condition e Action. Primeiro deve resolver o link.
+
     for (const bind of link.conditions) {
       if (bind.component.$ref === undefined) {
         errors.push({
-          message: `Reference to undefined media: '${bind.component.$name}'.`,
+          message: `Reference to undefined media or context: '${bind.component.$name}'.`,
           location: bind.component.location,
         })
       }
@@ -79,7 +83,7 @@ const validate = {
     for (const bind of link.actions) {
       if (bind.component.$ref === undefined) {
         errors.push({
-          message: `Reference to undefined media: '${bind.component.$name}'.`,
+          message: `Reference to undefined media or context: '${bind.component.$name}'.`,
           location: bind.component.location,
         })
       }

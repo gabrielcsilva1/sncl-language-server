@@ -2,7 +2,7 @@ import type { ILexingError, IRecognitionException, IToken } from 'chevrotain'
 import { type Diagnostic, DiagnosticSeverity } from 'vscode-languageserver'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ValidationError } from '../parser/parser'
-import type { Location } from '../syntax-tree'
+import type { AstNode, Location, Reference } from '../syntax-tree'
 
 export function getLocationFromToken(startNode: IToken, endNode?: IToken): Location {
   endNode = endNode ?? startNode
@@ -69,5 +69,14 @@ export function convertErrorToDiagnostic(
     range: { start, end },
     message: error.message,
     source: 'sNCL Language Server',
+  }
+}
+
+export function getReference<T extends AstNode>(token: IToken): Reference<T> {
+  return {
+    $type: 'Reference',
+    $name: token.image,
+    // O campo $ref é preenchido pelo Linker
+    location: getLocationFromToken(token),
   }
 }

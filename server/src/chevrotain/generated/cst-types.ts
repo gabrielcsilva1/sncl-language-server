@@ -28,6 +28,7 @@ export type DeclarationCstChildren = {
   region?: RegionCstNode[]
   media?: MediaCstNode[]
   port?: PortCstNode[]
+  context?: ContextCstNode[]
   link?: LinkCstNode[]
 }
 
@@ -64,6 +65,22 @@ export interface PortCstNode extends CstNode {
 export type PortCstChildren = {
   Port: IToken[]
   Identifier: IToken[]
+  Dot?: IToken[]
+}
+
+export interface ContextCstNode extends CstNode {
+  name: 'context'
+  children: ContextCstChildren
+}
+
+export type ContextCstChildren = {
+  Context: IToken[]
+  Identifier: IToken[]
+  port?: PortCstNode[]
+  media?: MediaCstNode[]
+  link?: LinkCstNode[]
+  context?: ContextCstNode[]
+  End: IToken[]
 }
 
 export interface LinkCstNode extends CstNode {
@@ -88,6 +105,7 @@ export interface ConditionCstNode extends CstNode {
 export type ConditionCstChildren = {
   Condition: IToken[]
   Identifier: IToken[]
+  Dot?: IToken[]
 }
 
 export interface ActionCstNode extends CstNode {
@@ -98,6 +116,7 @@ export interface ActionCstNode extends CstNode {
 export type ActionCstChildren = {
   Action: IToken[]
   Identifier: IToken[]
+  Dot?: IToken[]
   property?: PropertyCstNode[]
   End: IToken[]
 }
@@ -128,6 +147,7 @@ export interface ISnclNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   region(children: RegionCstChildren, param?: IN): OUT
   media(children: MediaCstChildren, param?: IN): OUT
   port(children: PortCstChildren, param?: IN): OUT
+  context(children: ContextCstChildren, param?: IN): OUT
   link(children: LinkCstChildren, param?: IN): OUT
   condition(children: ConditionCstChildren, param?: IN): OUT
   action(children: ActionCstChildren, param?: IN): OUT

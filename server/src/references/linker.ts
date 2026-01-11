@@ -11,16 +11,32 @@ export function link(document: SnclDocument): void {
     if (declaration.$type === 'Media' && declaration.rg) {
       declaration.rg.$ref = getReference(declaration.rg.$name, symbolTable, ['Region'])
     } else if (declaration.$type === 'Port') {
-      declaration.media.$ref = getReference(declaration.media.$name, symbolTable, ['Media'])
+      // O componente referenciado pode ser uma mídia ou um contexto.
+      declaration.component.$ref = getReference(declaration.component.$name, symbolTable, [
+        'Media',
+        'Context',
+      ])
+
+      // TODO: Realizar o link da propriedade interface
+      // TODO: Verificar uma forma de fazer o link da interface quando o componente referenciar uma Media
     } else if (declaration.$type === 'Link') {
+      // TODO: Realizar o link da propriedade interface para Conditions e Actions
+      // TODO: Verificar uma forma de fazer o link da interface quando o componente referenciar uma Media
+
       // Conditions
       for (const bind of declaration.conditions) {
-        bind.component.$ref = getReference(bind.component.$name, symbolTable, ['Media'])
+        bind.component.$ref = getReference(bind.component.$name, symbolTable, [
+          'Media',
+          'Context',
+        ])
       }
 
       // Actions
       for (const bind of declaration.actions) {
-        bind.component.$ref = getReference(bind.component.$name, symbolTable, ['Media'])
+        bind.component.$ref = getReference(bind.component.$name, symbolTable, [
+          'Media',
+          'Context',
+        ])
       }
     }
   }

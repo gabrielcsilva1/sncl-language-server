@@ -7,7 +7,7 @@ export interface Program extends AstNode {
 }
 
 // União de todos os tipos de declaração possíveis
-export type Declaration = Region | Media | Port | Link
+export type Declaration = Region | Media | Port | Link | Context
 
 export interface Region extends AstNode {
   $type: 'Region'
@@ -26,7 +26,14 @@ export interface Media extends AstNode {
 export interface Port extends AstNode {
   $type: 'Port'
   name: string
-  media: Reference<Media>
+  component: Reference<Media | Context>
+  interface?: Reference<Port>
+}
+
+export interface Context extends AstNode {
+  $type: 'Context'
+  name: string
+  children: Array<Media | Port | Link | Context>
 }
 
 export interface Link extends AstNode {
@@ -39,13 +46,15 @@ export interface Link extends AstNode {
 export interface Condition extends AstNode {
   $type: 'Condition'
   role: string
-  component: Reference<Media>
+  component: Reference<Media | Context>
+  interface?: Reference<Port>
 }
 
 export interface Action extends AstNode {
   $type: 'Action'
   role: string
-  component: Reference<Media>
+  component: Reference<Media | Context>
+  interface?: Reference<Port>
   properties: Property[]
 }
 
