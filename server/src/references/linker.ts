@@ -1,13 +1,8 @@
 import type { Declaration } from '../@types/sncl-types'
 import type { SymbolTable } from '../symbol-table'
-import type { SnclDocument } from '../workspace/document'
 
-export function link(document: SnclDocument): void {
-  const symbolTable = document.symbolTable
-
-  const program = document.parseResult.value
-
-  for (const declaration of program.declarations) {
+export function link(declarations: Declaration[], symbolTable: SymbolTable): void {
+  for (const declaration of declarations) {
     if (declaration.$type === 'Media' && declaration.rg) {
       declaration.rg.$ref = getReference(declaration.rg.$name, symbolTable, ['Region'])
     } else if (declaration.$type === 'Port') {
@@ -25,19 +20,15 @@ export function link(document: SnclDocument): void {
 
       // Conditions
       for (const bind of declaration.conditions) {
-        bind.component.$ref = getReference(bind.component.$name, symbolTable, [
-          'Media',
-          'Context',
-        ])
+        bind.component.$ref = getReference(bind.component.$name, symbolTable, ['Media', 'Context'])
       }
 
       // Actions
       for (const bind of declaration.actions) {
-        bind.component.$ref = getReference(bind.component.$name, symbolTable, [
-          'Media',
-          'Context',
-        ])
+        bind.component.$ref = getReference(bind.component.$name, symbolTable, ['Media', 'Context'])
       }
+    } else if (declaration.$type === 'Context') {
+      link(declaration.children, symbolTable)
     }
   }
 }

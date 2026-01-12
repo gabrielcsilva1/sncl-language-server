@@ -1,3 +1,4 @@
+import { type Either, left, right } from '../@types/either'
 import type * as ast from '../@types/sncl-types'
 import { identifierPatternExact } from '../chevrotain/tokens/generic'
 import type { ValidationError } from '../parser/parser'
@@ -7,21 +8,23 @@ export function validateDocument(document: SnclDocument): void {
   const errors: ValidationError[] = []
 
   errors.push(...document.symbolTable.duplicateErrors)
-  errors.push(...validateDeclaration(document))
+  errors.push(...validateDeclaration(document.parseResult.value.declarations))
 
   document.parseResult.errors.push(...errors)
 }
 
-function validateDeclaration(document: SnclDocument): ValidationError[] {
+function validateDeclaration(declarations: ast.Declaration[]): ValidationError[] {
   const errors: ValidationError[] = []
 
-  for (const declaration of document.parseResult.value.declarations) {
+  for (const declaration of declarations) {
     if (declaration.$type === 'Media') {
       errors.push(...validate.Media(declaration))
     } else if (declaration.$type === 'Port') {
       errors.push(...validate.Port(declaration))
     } else if (declaration.$type === 'Link') {
       errors.push(...validate.Link(declaration))
+    } else if (declaration.$type === 'Context') {
+      errors.push(...validateDeclaration(declaration.children))
     }
   }
   return errors
@@ -54,14 +57,11 @@ const validate = {
   Port: (port: ast.Port) => {
     const errors: ValidationError[] = []
 
-    if (!port.component.$ref) {
-      errors.push({
-        message: `Reference to undefined media or context: '${port.component.$name}'.`,
-        location: port.component.location,
-      })
-    }
+    const result = validateComponentReference(port)
 
-    // TODO: Validar interface. Primeiro deve resolver o link.
+    if (result.isLeft()) {
+      errors.push(result.value)
+    }
 
     return errors
   },
@@ -69,26 +69,61 @@ const validate = {
   Link: (link: ast.Link) => {
     const errors: ValidationError[] = []
 
-    // TODO: Validar interface para Condition e Action. Primeiro deve resolver o link.
-
     for (const bind of link.conditions) {
-      if (bind.component.$ref === undefined) {
-        errors.push({
-          message: `Reference to undefined media or context: '${bind.component.$name}'.`,
-          location: bind.component.location,
-        })
+      const result = validateComponentReference(bind)
+
+      if (result.isLeft()) {
+        errors.push(result.value)
       }
     }
 
     for (const bind of link.actions) {
-      if (bind.component.$ref === undefined) {
-        errors.push({
-          message: `Reference to undefined media or context: '${bind.component.$name}'.`,
-          location: bind.component.location,
-        })
+      const result = validateComponentReference(bind)
+
+      if (result.isLeft()) {
+        errors.push(result.value)
       }
     }
 
     return errors
   },
+}
+
+function validateComponentReference(
+  element: ast.Port | ast.Action | ast.Condition
+): Either<ValidationError, null> {
+  if (element.component.$ref === undefined) {
+    return left({
+      message: `Reference to undefined media or context: '${element.component.$name}'.`,
+      location: element.component.location,
+    })
+  }
+
+  const node = element.$type === 'Port' ? element : (element.$container as ast.Link)
+
+  if (!isInSameContext(node, element.component.$ref)) {
+    return left({
+      message: `Component ${element.component.$name} and element ${node.$type} are not within the same context.`,
+      location: element.component.location,
+    })
+  }
+
+  // TODO: Validar interface. Primeiro deve resolver o link.
+
+  return right(null)
+}
+
+function isInSameContext(element1: ast.Declaration, element2: ast.Declaration): boolean {
+  if (element1.$container === undefined || element2.$container === undefined) {
+    return element1.$container === element2.$container
+  }
+
+  if (element1.$container.$type !== 'Context' || element2.$container.$type !== 'Context') {
+    return false
+  }
+
+  const fatherEl1 = element1.$container as ast.Context
+  const fatherEl2 = element2.$container as ast.Context
+
+  return fatherEl1.name === fatherEl2.name
 }

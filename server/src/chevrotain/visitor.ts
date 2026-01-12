@@ -141,20 +141,27 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
   }
 
   link(children: LinkCstChildren): ast.Link {
-    const conditions = children.condition.map((condition) => this.visit(condition))
-    const actions = children.action?.map((action) => this.visit(action)) || []
-    const properties = children.property?.map((prop) => this.visit(prop)) || []
-
-    return {
+    const element: ast.Link = {
       $type: 'Link',
-      conditions,
-      actions,
-      properties,
-      location: getLocationFromToken(
-        children.condition[0].children.Condition[0],
-        children.End[0]
-      ),
+      actions: [],
+      conditions: [],
+      properties: [],
+      location: getLocationFromToken(children.condition[0].children.Condition[0]),
     }
+
+    element.conditions = children.condition.map((condition) => this.visit(condition))
+    element.actions = children.action?.map((action) => this.visit(action)) || []
+    element.properties = children.property?.map((prop) => this.visit(prop)) || []
+
+    element.conditions.forEach((condition) => {
+      condition.$container = element
+    })
+
+    element.actions.forEach((action) => {
+      action.$container = element
+    })
+
+    return element
   }
 
   condition(children: ConditionCstChildren): ast.Condition {
@@ -205,10 +212,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       $type: 'Property',
       key,
       value,
-      location: getLocationFromToken(
-        children.Identifier[0],
-        children.value[0].children.Value[0]
-      ),
+      location: getLocationFromToken(children.Identifier[0], children.value[0].children.Value[0]),
     }
   }
 

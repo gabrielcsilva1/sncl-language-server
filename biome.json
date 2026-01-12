@@ -14,7 +14,7 @@
 	"formatter": {
 		"enabled": true,
 		"useEditorconfig": true,
-		"lineWidth": 95
+		"lineWidth": 100
 	},
 	"linter": {
 		"enabled": true,

@@ -68,7 +68,7 @@ export class SnclDocumentFactory implements ISnclDocumentFactory {
     }
 
     // 2. Linking
-    link(document)
+    link(document.parseResult.value.declarations, document.symbolTable)
 
     // 3. Validação
     validateDocument(document)
