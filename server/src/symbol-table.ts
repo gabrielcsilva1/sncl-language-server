@@ -1,20 +1,20 @@
-import type * as ast from './@types/sncl-types'
+import type { Declaration } from './@types/sncl-types'
 import type { ValidationError } from './parser/parser'
 
 export class SymbolTable {
-  private elements: Map<string | number, ast.Declaration>
+  private elements: Map<string | number, Declaration>
   private _duplicateErrors: ValidationError[] = []
 
   public constructor() {
     this.elements = new Map()
   }
 
-  update(program: ast.Program) {
+  update(declarations: Array<Declaration>) {
     this.clear()
-    this.updateRecursive(program.declarations)
+    this.updateRecursive(declarations)
   }
 
-  private updateRecursive(elements: Array<ast.Declaration>) {
+  private updateRecursive(elements: Array<Declaration>) {
     for (const element of elements) {
       this.addElement(element)
 
@@ -24,7 +24,7 @@ export class SymbolTable {
     }
   }
 
-  public addElement(element: ast.Declaration) {
+  public addElement(element: Declaration) {
     if (element.$type === 'Link') {
       const length = this.elements.size
       this.elements.set(length, element)

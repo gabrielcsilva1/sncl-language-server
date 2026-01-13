@@ -18,7 +18,6 @@ import { Colon, Dot } from './tokens/symbols'
 export class SnclParser extends CstParser {
   constructor() {
     super(allTokens, {
-      nodeLocationTracking: 'onlyOffset',
       maxLookahead: 1,
     })
 

@@ -6,7 +6,7 @@ export interface AstNode {
   $type: string
 
   /**
-   * Referência ao nó pai na AST.
+   * Referência ao nó pai na AST (opcional).
    * Essencial para subir na arvore e encontrar escopos.
    */
   $container?: AstNode
@@ -20,14 +20,20 @@ export interface Location {
   endOffset: number
 }
 
-// Uma interface genérica para representar uma referência.
+/**
+ * Uma interface que representar uma referência a outro elemento ({@link AstNode}).
+ * A referência pode ou não ser resolvida.
+ *  */
 export interface Reference<T extends AstNode = AstNode> {
   $type: 'Reference'
 
-  /** O identificador do nó */
+  /** O identificador do elemento */
   $name: string
 
-  /** A referência resolvida para o nó da AST. */
+  /**
+   * A referência resolvida na fase de `Link`. Caso não seja resolvida a referência
+   * fica com o valor `undefined`.
+   * */
   $ref?: T
 
   location: Location

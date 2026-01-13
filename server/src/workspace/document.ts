@@ -1,4 +1,4 @@
-import type { Program } from '../@types/sncl-types'
+import type { Declaration } from '../@types/sncl-types'
 import { DocumentParser, type IDocumentParser, type ParseResult } from '../parser/parser'
 import { link } from '../references/linker'
 import { SymbolTable } from '../symbol-table'
@@ -12,7 +12,7 @@ export interface SnclDocument {
   text: string
 
   /** O resultado do parser, pode conter os erros de parser/lexer */
-  parseResult: ParseResult<Program>
+  parseResult: ParseResult<Declaration[]>
 
   symbolTable: SymbolTable
 }
@@ -68,7 +68,7 @@ export class SnclDocumentFactory implements ISnclDocumentFactory {
     }
 
     // 2. Linking
-    link(document.parseResult.value.declarations, document.symbolTable)
+    link(document.parseResult.value, document.symbolTable)
 
     // 3. Validação
     validateDocument(document)

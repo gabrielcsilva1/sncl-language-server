@@ -26,8 +26,8 @@ export interface Media extends AstNode {
 export interface Port extends AstNode {
   $type: 'Port'
   name: string
-  component: Reference<Media | Context>
-  interface?: Reference<Port>
+  component: Reference<ComponentRefTypes>
+  interface?: Reference<InterfaceRefTypes>
 }
 
 export interface Context extends AstNode {
@@ -47,21 +47,21 @@ export interface Condition extends AstNode {
   $type: 'Condition'
   role: string
   component: Reference<Media | Context>
-  interface?: Reference<Port>
+  interface?: Reference<InterfaceRefTypes>
 }
 
 export interface Action extends AstNode {
   $type: 'Action'
   role: string
   component: Reference<Media | Context>
-  interface?: Reference<Port>
+  interface?: Reference<InterfaceRefTypes>
   properties: Property[]
 }
 
 export interface Property extends AstNode {
   $type: 'Property'
   key: string
-  value: PropertyValue
+  $value: PropertyValue
 }
 
 // Tipos para os valores das propriedades
@@ -69,3 +69,19 @@ export interface PropertyValue extends AstNode {
   $type: 'Value'
   value: string
 }
+
+/**********************************************
+ *          Union Types - Utilitários          *
+ ***********************************************/
+
+/**
+ * Tipos que podem ser referenciados pelo campo `component` de
+ * uma {@link Port}, {@link Action} ou {@link Condition}
+ * */
+export type ComponentRefTypes = Media | Context
+
+/**
+ * Tipos que podem ser referenciados pelo campo `interface` de
+ * uma {@link Port}, {@link Action} ou {@link Condition}
+ */
+export type InterfaceRefTypes = Port | Property

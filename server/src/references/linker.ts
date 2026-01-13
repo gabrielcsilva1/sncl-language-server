@@ -41,14 +41,14 @@ export function link(declarations: Declaration[], symbolTable: SymbolTable): voi
  * // É o mesmo que fazer
  * type DeclarationType = 'Region' | 'Media' | 'Port'  ...
  */
-type DeclarationType = Declaration['$type']
+type DeclarationTypes = Declaration['$type']
 
-function getReference<T extends DeclarationType>(
-  name: string,
+function getReference<T extends DeclarationTypes>(
+  elementId: string,
   symbolTable: SymbolTable,
   targetTypes: T[]
 ) {
-  const target = symbolTable.getElement(name)
+  const target = symbolTable.getElement(elementId)
 
   if (target !== undefined && (targetTypes as readonly string[]).includes(target.$type)) {
     return target as Extract<Declaration, { $type: T }>

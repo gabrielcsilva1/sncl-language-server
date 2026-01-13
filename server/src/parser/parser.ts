@@ -1,4 +1,4 @@
-import type { Program } from '../@types/sncl-types'
+import type { Declaration, Program } from '../@types/sncl-types'
 import { sNCLParser } from '../chevrotain/parser'
 import { sNCLLexer } from '../chevrotain/tokens'
 import { sNCLVisitor } from '../chevrotain/visitor'
@@ -16,11 +16,11 @@ export interface ValidationError {
 }
 
 export interface IDocumentParser {
-  parse(text: string): ParseResult<Program>
+  parse(text: string): ParseResult<Declaration[]>
 }
 
 export class DocumentParser implements IDocumentParser {
-  parse(text: string): ParseResult<Program> {
+  parse(text: string): ParseResult<Declaration[]> {
     const validationErrors: ValidationError[] = []
 
     // 1 - Gera os tokens
@@ -36,21 +36,15 @@ export class DocumentParser implements IDocumentParser {
     validationErrors.push(...getValidationErrorFromParser(sNCLParser.errors, text.length))
 
     // 3 - Gera a AST do resultado da fase de parsing
-    let astResult = sNCLVisitor.visit(cst) as Omit<Program, 'location'> | undefined
+    let astResult = sNCLVisitor.visit(cst) as Program | undefined
 
     if (!astResult) {
       astResult = getEmptyProgram(text.length)
     }
 
     // Preenche a location
-    const parseResult: ParseResult<Program> = {
-      value: {
-        ...astResult,
-        location: {
-          startOffset: 0,
-          endOffset: text.length - 1,
-        },
-      },
+    const parseResult: ParseResult<Declaration[]> = {
+      value: astResult.declarations,
       errors: validationErrors,
     }
 

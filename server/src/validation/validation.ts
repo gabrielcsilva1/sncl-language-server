@@ -8,7 +8,7 @@ export function validateDocument(document: SnclDocument): void {
   const errors: ValidationError[] = []
 
   errors.push(...document.symbolTable.duplicateErrors)
-  errors.push(...validateDeclaration(document.parseResult.value.declarations))
+  errors.push(...validateDeclaration(document.parseResult.value))
 
   document.parseResult.errors.push(...errors)
 }

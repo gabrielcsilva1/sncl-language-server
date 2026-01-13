@@ -14,7 +14,7 @@ import type {
   ValueCstChildren,
 } from '../chevrotain/generated/cst-types'
 import type { Reference } from '../syntax-tree'
-import { getLocationFromToken, getReference } from '../utils/utils'
+import { getLocationFromToken, makeReference } from '../utils/utils'
 import { sNCLParser } from './parser'
 
 const BaseCstVisitor = sNCLParser.getBaseCstVisitorConstructor()
@@ -25,14 +25,20 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
     this.validateVisitor()
   }
 
-  program(children: ProgramCstChildren): Omit<ast.Program, 'location'> {
+  program(children: ProgramCstChildren): ast.Program {
     const declarations = (children.declaration || [])
       .map((decl) => this.visit(decl))
-      .filter((decl) => decl !== undefined) // Pode ser undefined para declarações não implementadas
+      .filter((decl) => decl !== undefined) as ast.Declaration[] // Pode ser undefined para declarações não implementadas
+
+    const endOffset = declarations.at(-1)?.location.endOffset ?? 0
 
     return {
       $type: 'Program',
       declarations,
+      location: {
+        startOffset: 0,
+        endOffset: endOffset,
+      },
     }
   }
 
@@ -78,9 +84,9 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       if (node.key === 'rg') {
         rgRef = {
           $type: 'Reference',
-          $name: node.value.value,
+          $name: node.$value.value,
           // O campo 'ref' será preenchido pelo Linker
-          location: node.value.location,
+          location: node.$value.location,
         }
       } else {
         properties.push(node)
@@ -98,19 +104,15 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
 
   port(children: PortCstChildren): ast.Port {
     const portId = children.Identifier[0].image
-    const componentId = children.Identifier[1].image
+    const componentRef = makeReference<ast.ComponentRefTypes>(children.Identifier[1])
 
-    const iface = children.Dot && getReference<ast.Port>(children.Identifier[2])
+    const iface = children.Dot && makeReference<ast.InterfaceRefTypes>(children.Identifier[2])
 
     return {
       $type: 'Port',
       name: portId,
       // O campo 'ref' será preenchido pelo Linker
-      component: {
-        $type: 'Reference',
-        $name: componentId,
-        location: getLocationFromToken(children.Identifier[1]),
-      },
+      component: componentRef,
       interface: iface,
       location: getLocationFromToken(children.Port[0], children.Identifier[1]),
     }
@@ -166,18 +168,14 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
 
   condition(children: ConditionCstChildren): ast.Condition {
     const role = children.Condition[0].image
-    const componentId = children.Identifier[0].image
+    const componentRef = makeReference<ast.ComponentRefTypes>(children.Identifier[0])
 
-    const iface = children.Dot && getReference<ast.Port>(children.Identifier[1])
+    const iface = children.Dot && makeReference<ast.InterfaceRefTypes>(children.Identifier[1])
 
     return {
       $type: 'Condition',
       role,
-      component: {
-        $type: 'Reference',
-        $name: componentId,
-        location: getLocationFromToken(children.Identifier[0]),
-      },
+      component: componentRef,
       interface: iface,
       location: getLocationFromToken(children.Condition[0], children.Identifier[0]),
     }
@@ -185,20 +183,16 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
 
   action(children: ActionCstChildren): ast.Action {
     const role = children.Action[0].image
-    const componentId = children.Identifier[0].image
+    const componentRef = makeReference<ast.ComponentRefTypes>(children.Identifier[0])
     const properties = (children.property || []).map((prop) => this.visit(prop))
 
-    const iface = children.Dot && getReference<ast.Port>(children.Identifier[2])
+    const iface = children.Dot && makeReference<ast.Port>(children.Identifier[2])
 
     return {
       $type: 'Action',
       role,
       properties,
-      component: {
-        $type: 'Reference',
-        $name: componentId,
-        location: getLocationFromToken(children.Identifier[0]),
-      },
+      component: componentRef,
       interface: iface,
       location: getLocationFromToken(children.Action[0], children.End[0]),
     }
@@ -211,7 +205,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
     return {
       $type: 'Property',
       key,
-      value,
+      $value: value,
       location: getLocationFromToken(children.Identifier[0], children.value[0].children.Value[0]),
     }
   }

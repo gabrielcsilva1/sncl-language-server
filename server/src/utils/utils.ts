@@ -40,7 +40,7 @@ export function getValidationErrorFromParser(
     let endOffset = startOffset + error.token.image.length
 
     if (Number.isNaN(error.token.startOffset)) {
-      // Ocorre quado espera um próximo token, mas encontra um EOF
+      // Ocorre quado espera um próximo token (X), mas encontra um EOF ou token outro token (Y), sendo o ultimo token.
       startOffset = textLength - 1
       endOffset = textLength
     }
@@ -72,7 +72,12 @@ export function convertErrorToDiagnostic(
   }
 }
 
-export function getReference<T extends AstNode>(token: IToken): Reference<T> {
+/**
+ * Cria um objeto do tipo {@link Reference}.
+ * @template T - Tipo do nó, no qual a referência é feita.
+ * @param token - Token que vai ser extraído as informações do id e localização da referência
+ */
+export function makeReference<T extends AstNode>(token: IToken): Reference<T> {
   return {
     $type: 'Reference',
     $name: token.image,
