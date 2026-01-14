@@ -3,6 +3,7 @@ import { allTokens } from './tokens'
 import { Identifier } from './tokens/generic'
 import {
   Action,
+  Area,
   Condition,
   ConditionSeparator,
   Context,
@@ -59,8 +60,17 @@ export class SnclParser extends CstParser {
     this.CONSUME(Identifier)
 
     this.MANY(() => {
-      this.SUBRULE(this.property)
+      this.OR([{ ALT: () => this.SUBRULE(this.area) }, { ALT: () => this.SUBRULE(this.property) }])
     })
+
+    this.CONSUME(End)
+  })
+
+  private area = this.RULE('area', () => {
+    this.CONSUME(Area)
+    this.CONSUME(Identifier)
+
+    this.MANY(() => this.SUBRULE(this.property))
 
     this.CONSUME(End)
   })

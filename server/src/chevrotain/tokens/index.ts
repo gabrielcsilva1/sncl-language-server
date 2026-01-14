@@ -2,6 +2,7 @@ import { Lexer } from 'chevrotain'
 import { Identifier, WhiteSpaces } from './generic'
 import {
   Action,
+  Area,
   Condition,
   ConditionSeparator,
   Context,
@@ -18,6 +19,7 @@ import { Colon, Dot } from './symbols'
 export const allTokens = [
   WhiteSpaces,
   // Palavras chaves
+  Area,
   Context,
   End,
   Media,

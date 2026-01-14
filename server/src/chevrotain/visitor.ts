@@ -1,6 +1,7 @@
 import type * as ast from '../@types/sncl-types'
 import type {
   ActionCstChildren,
+  AreaCstChildren,
   ConditionCstChildren,
   ContextCstChildren,
   DeclarationCstChildren,
@@ -78,6 +79,8 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
     const properties: ast.Property[] = []
     let rgRef: Reference<ast.Region> | undefined
 
+    const areas = children.area?.map((area) => this.visit(area)) || []
+
     for (const property of children.property || []) {
       const node = this.visit(property) as ast.Property
 
@@ -98,7 +101,21 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       name,
       rg: rgRef,
       properties,
+      children: areas,
       location: getLocationFromToken(children.Media[0], children.End[0]),
+    }
+  }
+
+  area(children: AreaCstChildren): ast.Area {
+    const id = children.Identifier[0].image
+
+    const properties = children.property?.map((prop) => this.visit(prop)) || []
+
+    return {
+      $type: 'Area',
+      name: id,
+      properties: properties,
+      location: getLocationFromToken(children.Area[0], children.End[0]),
     }
   }
 

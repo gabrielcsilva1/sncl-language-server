@@ -53,6 +53,19 @@ export interface MediaCstNode extends CstNode {
 export type MediaCstChildren = {
   Media: IToken[]
   Identifier: IToken[]
+  area?: AreaCstNode[]
+  property?: PropertyCstNode[]
+  End: IToken[]
+}
+
+export interface AreaCstNode extends CstNode {
+  name: 'area'
+  children: AreaCstChildren
+}
+
+export type AreaCstChildren = {
+  Area: IToken[]
+  Identifier: IToken[]
   property?: PropertyCstNode[]
   End: IToken[]
 }
@@ -146,6 +159,7 @@ export interface ISnclNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   declaration(children: DeclarationCstChildren, param?: IN): OUT
   region(children: RegionCstChildren, param?: IN): OUT
   media(children: MediaCstChildren, param?: IN): OUT
+  area(children: AreaCstChildren, param?: IN): OUT
   port(children: PortCstChildren, param?: IN): OUT
   context(children: ContextCstChildren, param?: IN): OUT
   link(children: LinkCstChildren, param?: IN): OUT

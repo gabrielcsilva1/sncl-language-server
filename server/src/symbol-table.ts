@@ -1,8 +1,8 @@
-import type { Declaration } from './@types/sncl-types'
+import type { Area, Declaration } from './@types/sncl-types'
 import type { ValidationError } from './parser/parser'
 
 export class SymbolTable {
-  private elements: Map<string | number, Declaration>
+  private elements: Map<string | number, Declaration | Area>
   private _duplicateErrors: ValidationError[] = []
 
   public constructor() {
@@ -14,17 +14,17 @@ export class SymbolTable {
     this.updateRecursive(declarations)
   }
 
-  private updateRecursive(elements: Array<Declaration>) {
+  private updateRecursive(elements: Array<Declaration | Area>) {
     for (const element of elements) {
       this.addElement(element)
 
-      if (element.$type === 'Region' || element.$type === 'Context') {
+      if (element.$type === 'Region' || element.$type === 'Context' || element.$type === 'Media') {
         this.updateRecursive(element.children)
       }
     }
   }
 
-  public addElement(element: Declaration) {
+  public addElement(element: Declaration | Area) {
     if (element.$type === 'Link') {
       const length = this.elements.size
       this.elements.set(length, element)

@@ -1,6 +1,12 @@
 import { createToken } from 'chevrotain'
 import { Identifier } from './generic'
 
+export const Area = createToken({
+  name: 'Area',
+  pattern: /area/,
+  longer_alt: Identifier,
+})
+
 export const Context = createToken({
   name: 'Context',
   pattern: /context/,

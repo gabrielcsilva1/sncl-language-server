@@ -21,6 +21,13 @@ export interface Media extends AstNode {
   name: string
   rg?: Reference<Region>
   properties: Property[]
+  children: Area[]
+}
+
+export interface Area extends AstNode {
+  $type: 'Area'
+  name: string
+  properties: Property[]
 }
 
 export interface Port extends AstNode {
