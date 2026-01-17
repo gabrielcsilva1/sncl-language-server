@@ -1,0 +1,237 @@
+{
+  "name": "sNCL",
+  "scopeName": "source.sncl",
+  "patterns": [
+    {
+      "include": "#statements"
+    }
+  ],
+  "repository": {
+    "statements": {
+      "patterns": [
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#numeric-literal"
+        },
+        {
+          "name": "meta.object-literal.key.sncl",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\\s*:\\s*)"
+        },
+        {
+          "name": "punctuation.separator.key-value.sncl",
+          "match": ":"
+        },
+        {
+          "include": "#reserved-word"
+        },
+        {
+          "include": "#function-declaration"
+        },
+        {
+          "include": "#function-call"
+        },
+        {
+          "include": "#identifiers"
+        }
+      ]
+    },
+    "string": {
+      "patterns": [
+        {
+          "include": "#qstring-double"
+        }
+      ]
+    },
+    "qstring-double": {
+			"name": "string.quoted.double.sncl",
+			"begin": "\"",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.begin.sncl"
+				}
+			},
+			"end": "(\")|((?:[^\\n])$)",
+			"endCaptures": {
+				"1": {
+					"name": "punctuation.definition.string.end.sncl"
+				},
+				"2": {
+					"name": "invalid.illegal.newline.sncl"
+				}
+			}
+		},
+    "comment": {
+      "patterns": [
+        {
+          "include": "#comment-line"
+        },
+        {
+          "include": "#comment-block"
+        }
+      ]
+    },
+    "comment-line": {
+      "name": "comment.line.double-dash.sncl",
+      "begin": "--(?!(\\[\\[))",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.sncl"
+        }
+      },
+      "end": "$",
+      "patterns": [
+			{
+				"name": "storage.type.class.todo.sncl",
+				"match": "\\b(TODO|FIXME|NOTE)\\b"
+			}
+		]
+    },
+    "comment-block": {
+      "name": "comment.block.sncl",
+      "begin": "--\\[\\[",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.begin.sncl"
+        }
+      },
+      "end": "\\]\\]",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.end.sncl"
+        }
+      }
+    },
+    "numeric-literal": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.sncl",
+          "match": "#[0-9a-fA-F]{3,8}\\b"
+        },
+        {
+          "name": "constant.numeric.decimal.sncl",
+          "match": "\\b[[:digit:]]+"
+        },
+        {
+          "match": "(\\.)([[:digit:]]+)",
+          "captures": {
+            "1": {
+              "name": "meta.delimiter.decimal.period.sncl"
+            },
+            "2": {
+              "name": "constant.numeric.decimal.sncl"
+            }
+          }
+        },
+        {
+          "name": "keyword.operator.arithmetic.sncl",
+          "match": "%"
+        }
+      ]
+    },
+    "reserved-word": {
+      "patterns": [
+        {
+          "name": "keyword.control.sncl",
+          "match": "\\b(area|context|do|end|macro|media|onBegin|onEnd|onSelection|port|region|set|start|stop)\\b"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+					"name": "variable.other.constant.sncl",
+					"match": "[_[:alpha:]][_[:alnum:]]*"
+				},
+        {
+          "match": "(\\.)([_[:alpha:]][_[:alnum:]]*)",
+          "captures": {
+            "1": {
+              "name": "punctuation.accessor.sncl"
+            },
+            "2": {
+              "name": "variable.other.constant.property.sncl"
+            }
+          }
+        }
+      ]
+    },
+    "function-declaration": {
+      "name": "meta.function.sncl",
+      "begin": "\\b(macro)\\s+([_[:alpha:]][_[:alnum:]]*)",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.function.sncl"
+        },
+        "2": {
+          "name": "meta.definition.function.sncl entity.name.function.sncl"
+        }
+      },
+      "end": "(?<=\\))",
+      "patterns": [
+        {
+          "include": "#function-parameters"
+        }
+      ]
+    },
+    "function-parameters": {
+      "begin": "(\\()",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.parameters.begin.sncl"
+        }
+      },
+      "end": "(\\))",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.parameters.end.sncl"
+        }
+      },
+			"patterns": [
+				{
+          "include": "#function-parameters-body"
+        }
+			]
+		},
+    "function-parameters-body": {
+      "patterns": [
+        {
+					"include": "#comment"
+				},
+				{
+					"include": "#string"
+				},
+        {
+          "include": "#number"
+        },
+				{
+					"name": "variable.other.constant.sncl",
+          "match": "[_[:alpha:]][_[:alnum:]]*"
+				},
+				{
+					"name": "punctuation.separator.parameter.sncl",
+					"match": ","
+				}
+      ]
+    },
+    "function-call": {
+      "name": "meta.function-call.sncl",
+      "begin": "\\b([_[:alpha:]][_[:alnum:]]*)\\s*(?=\\()",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.function.teste.sncl"
+        }
+      },
+      "end": "(?<=\\))",
+      "patterns": [
+        {
+          "include": "#function-parameters"
+        }
+      ] 
+    }
+  }
+}

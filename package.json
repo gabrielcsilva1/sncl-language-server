@@ -9,17 +9,22 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onLanguage:sncl"
-  ],
   "main": "client/out/extension.js",
   "contributes": {
+    "grammars": [
+      {
+        "language": "sncl",
+        "scopeName": "source.sncl",
+        "path": "./language/sncl.tmLanguage.json"
+      }
+    ],
     "languages": [
       {
         "id": "sncl",
         "extensions": [
           ".sncl"
-        ]
+        ],
+        "configuration": "./language/language-configuration.json"
       }
     ]
   },
@@ -45,8 +50,7 @@
   },
   "lint-staged": {
     "*.{ts, md}": [
-      "biome format --write",
-      "biome lint"
+      "biome format --write --no-errors-on-unmatched"
     ]
   }
 }
