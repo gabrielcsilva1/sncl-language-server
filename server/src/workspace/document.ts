@@ -1,4 +1,5 @@
 import type { Declaration } from '../@types/sncl-types'
+import { processMacroCall } from '../macro-resolver'
 import { DocumentParser, type IDocumentParser, type ParseResult } from '../parser/parser'
 import { link } from '../references/linker'
 import { SymbolTable } from '../symbol-table'
@@ -56,6 +57,8 @@ export class SnclDocumentFactory implements ISnclDocumentFactory {
       symbolTable: symbolTable,
     }
 
+    processMacroCall(document)
+
     return document
   }
 
@@ -65,6 +68,7 @@ export class SnclDocumentFactory implements ISnclDocumentFactory {
       document.text = newText
       document.parseResult = this.parserService.parse(newText)
       document.symbolTable.update(document.parseResult.value)
+      processMacroCall(document)
     }
 
     // 2. Linking

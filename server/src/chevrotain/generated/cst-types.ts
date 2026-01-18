@@ -30,6 +30,8 @@ export type DeclarationCstChildren = {
   port?: PortCstNode[]
   context?: ContextCstNode[]
   link?: LinkCstNode[]
+  macro?: MacroCstNode[]
+  macroCall?: MacroCallCstNode[]
 }
 
 export interface RegionCstNode extends CstNode {
@@ -154,6 +156,48 @@ export type ValueCstChildren = {
   Value: IToken[]
 }
 
+export interface MacroCstNode extends CstNode {
+  name: 'macro'
+  children: MacroCstChildren
+}
+
+export type MacroCstChildren = {
+  Macro: IToken[]
+  Identifier: IToken[]
+  LParen: IToken[]
+  Comma?: IToken[]
+  RParen: IToken[]
+  macroDeclaration?: MacroDeclarationCstNode[]
+  End: IToken[]
+}
+
+export interface MacroDeclarationCstNode extends CstNode {
+  name: 'macroDeclaration'
+  children: MacroDeclarationCstChildren
+}
+
+export type MacroDeclarationCstChildren = {
+  region?: RegionCstNode[]
+  media?: MediaCstNode[]
+  port?: PortCstNode[]
+  context?: ContextCstNode[]
+  link?: LinkCstNode[]
+  macroCall?: MacroCallCstNode[]
+}
+
+export interface MacroCallCstNode extends CstNode {
+  name: 'macroCall'
+  children: MacroCallCstChildren
+}
+
+export type MacroCallCstChildren = {
+  Identifier: IToken[]
+  LParen: IToken[]
+  value?: ValueCstNode[]
+  Comma?: IToken[]
+  RParen: IToken[]
+}
+
 export interface ISnclNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   program(children: ProgramCstChildren, param?: IN): OUT
   declaration(children: DeclarationCstChildren, param?: IN): OUT
@@ -167,4 +211,7 @@ export interface ISnclNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   action(children: ActionCstChildren, param?: IN): OUT
   property(children: PropertyCstChildren, param?: IN): OUT
   value(children: ValueCstChildren, param?: IN): OUT
+  macro(children: MacroCstChildren, param?: IN): OUT
+  macroDeclaration(children: MacroDeclarationCstChildren, param?: IN): OUT
+  macroCall(children: MacroCallCstChildren, param?: IN): OUT
 }

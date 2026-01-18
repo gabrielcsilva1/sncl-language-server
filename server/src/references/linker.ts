@@ -43,7 +43,7 @@ export function link(declarations: Declaration[], symbolTable: SymbolTable): voi
  */
 type DeclarationTypes = Declaration['$type']
 
-function getReference<T extends DeclarationTypes>(
+export function getReference<T extends DeclarationTypes>(
   elementId: string,
   symbolTable: SymbolTable,
   targetTypes: T[]

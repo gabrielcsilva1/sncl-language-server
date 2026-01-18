@@ -103,7 +103,7 @@ function validateComponentReference(
 
   if (!isInSameContext(node, element.component.$ref)) {
     return left({
-      message: `Component ${element.component.$name} and element ${node.$type} are not within the same context.`,
+      message: `Component '${element.component.$name}' is not in the same context.`,
       location: element.component.location,
     })
   }

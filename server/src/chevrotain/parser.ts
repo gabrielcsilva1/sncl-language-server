@@ -9,12 +9,13 @@ import {
   Context,
   Do,
   End,
+  Macro,
   Media,
   Port,
   Region,
 } from './tokens/keywords'
 import { Value } from './tokens/literals'
-import { Colon, Dot } from './tokens/symbols'
+import { Colon, Comma, Dot, LParen, RParen } from './tokens/symbols'
 
 export class SnclParser extends CstParser {
   constructor() {
@@ -38,6 +39,8 @@ export class SnclParser extends CstParser {
       { ALT: () => this.SUBRULE(this.port) },
       { ALT: () => this.SUBRULE(this.context) },
       { ALT: () => this.SUBRULE(this.link) },
+      { ALT: () => this.SUBRULE(this.macro) },
+      { ALT: () => this.SUBRULE(this.macroCall) },
     ])
   })
 
@@ -156,6 +159,54 @@ export class SnclParser extends CstParser {
 
   private value = this.RULE('value', () => {
     this.CONSUME(Value)
+  })
+
+  private macro = this.RULE('macro', () => {
+    this.CONSUME(Macro)
+    this.CONSUME1(Identifier)
+
+    this.CONSUME(LParen)
+
+    this.MANY_SEP({
+      SEP: Comma,
+      DEF: () => {
+        this.CONSUME2(Identifier)
+      },
+    })
+
+    this.CONSUME(RParen)
+
+    this.MANY(() => {
+      this.SUBRULE(this.macroDeclaration)
+    })
+
+    this.CONSUME(End)
+  })
+
+  private macroDeclaration = this.RULE('macroDeclaration', () => {
+    this.OR([
+      { ALT: () => this.SUBRULE(this.region) },
+      { ALT: () => this.SUBRULE(this.media) },
+      { ALT: () => this.SUBRULE(this.port) },
+      { ALT: () => this.SUBRULE(this.context) },
+      { ALT: () => this.SUBRULE(this.link) },
+      { ALT: () => this.SUBRULE(this.macroCall) },
+    ])
+  })
+
+  private macroCall = this.RULE('macroCall', () => {
+    this.CONSUME(Identifier)
+
+    this.CONSUME(LParen)
+
+    this.MANY_SEP({
+      SEP: Comma,
+      DEF: () => {
+        this.SUBRULE(this.value)
+      },
+    })
+
+    this.CONSUME(RParen)
   })
 }
 

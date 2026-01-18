@@ -60,3 +60,9 @@ export const ConditionSeparator = createToken({
   pattern: /AND|OR/,
   longer_alt: Identifier,
 })
+
+export const Macro = createToken({
+  name: 'Macro',
+  pattern: /macro/,
+  longer_alt: Identifier,
+})

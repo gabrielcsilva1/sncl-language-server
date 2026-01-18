@@ -8,12 +8,13 @@ import {
   Context,
   Do,
   End,
+  Macro,
   Media,
   Port,
   Region,
 } from './keywords'
 import { NumberLiteral, StringLiteral, Value } from './literals'
-import { Colon, Dot } from './symbols'
+import { Colon, Comma, Dot, LParen, RParen } from './symbols'
 
 // A ordem dos tokens importa
 export const allTokens = [
@@ -29,11 +30,15 @@ export const allTokens = [
   Action,
   Do,
   ConditionSeparator,
+  Macro,
   // Símbolos e literais
   Colon,
   NumberLiteral,
   StringLiteral,
   Dot,
+  Comma,
+  LParen,
+  RParen,
   // Categorias
   Value,
   // O identificador vem por último.

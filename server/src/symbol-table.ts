@@ -25,18 +25,18 @@ export class SymbolTable {
   }
 
   public addElement(element: Declaration | Area) {
-    if (element.$type === 'Link') {
-      const length = this.elements.size
-      this.elements.set(length, element)
+    if (element.$type === 'Link' || element.$type === 'MacroCall') {
       return
-    } else if (this.elements.get(element.name)) {
+    }
+
+    if (this.elements.get(element.name)) {
       this._duplicateErrors.push({
         message: `Duplicated identifier: ${element.name}`,
         location: element.location,
       })
+    } else {
+      this.elements.set(element.name, element)
     }
-
-    this.elements.set(element.name, element)
   }
 
   public getElement(name: string) {

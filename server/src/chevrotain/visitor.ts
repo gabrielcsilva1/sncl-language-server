@@ -7,6 +7,9 @@ import type {
   DeclarationCstChildren,
   ISnclNodeVisitor,
   LinkCstChildren,
+  MacroCallCstChildren,
+  MacroCstChildren,
+  MacroDeclarationCstChildren,
   MediaCstChildren,
   PortCstChildren,
   ProgramCstChildren,
@@ -54,6 +57,10 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       return this.visit(children.link)
     } else if (children.context) {
       return this.visit(children.context)
+    } else if (children.macro) {
+      return this.visit(children.macro)
+    } else if (children.macroCall) {
+      return this.visit(children.macroCall)
     }
 
     return
@@ -232,6 +239,55 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       $type: 'Value',
       value: children.Value[0].image,
       location: getLocationFromToken(children.Value[0]),
+    }
+  }
+
+  macro(children: MacroCstChildren): ast.Macro {
+    const element: ast.Macro = {
+      $type: 'Macro',
+      name: children.Identifier[0].image,
+      children: [],
+      parameters: [],
+      location: getLocationFromToken(children.Identifier[0], children.End[0]),
+    }
+
+    element.parameters = children.Identifier.slice(1).map((token) => token.image)
+
+    const macroDeclarations = (children.macroDeclaration || [])
+      .map((decl) => this.visit(decl))
+      .filter((decl) => decl !== undefined) // Pode ser undefined para declarações não implementadas
+
+    element.children = macroDeclarations
+
+    return element
+  }
+
+  macroDeclaration(children: MacroDeclarationCstChildren): unknown {
+    if (children.region) {
+      return this.visit(children.region)
+    } else if (children.media) {
+      return this.visit(children.media)
+    } else if (children.port) {
+      return this.visit(children.port)
+    } else if (children.link) {
+      return this.visit(children.link)
+    } else if (children.context) {
+      return this.visit(children.context)
+    } else if (children.macroCall) {
+      return this.visit(children.macroCall)
+    }
+
+    return
+  }
+
+  macroCall(children: MacroCallCstChildren): ast.MacroCall {
+    const args = children.value?.map((value) => this.visit(value)) || []
+
+    return {
+      $type: 'MacroCall',
+      arguments: args,
+      macro: makeReference(children.Identifier[0]),
+      location: getLocationFromToken(children.Identifier[0], children.RParen[0]),
     }
   }
 }

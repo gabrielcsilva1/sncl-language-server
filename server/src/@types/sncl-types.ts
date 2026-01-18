@@ -7,7 +7,7 @@ export interface Program extends AstNode {
 }
 
 // União de todos os tipos de declaração possíveis
-export type Declaration = Region | Media | Port | Link | Context
+export type Declaration = Region | Media | Port | Link | Context | Macro | MacroCall
 
 export interface Region extends AstNode {
   $type: 'Region'
@@ -40,8 +40,10 @@ export interface Port extends AstNode {
 export interface Context extends AstNode {
   $type: 'Context'
   name: string
-  children: Array<Media | Port | Link | Context>
+  children: Array<ContextBody>
 }
+
+export type ContextBody = Media | Port | Link | Context
 
 export interface Link extends AstNode {
   $type: 'Link'
@@ -63,6 +65,22 @@ export interface Action extends AstNode {
   component: Reference<Media | Context>
   interface?: Reference<InterfaceRefTypes>
   properties: Property[]
+}
+
+export interface Macro extends AstNode {
+  $type: 'Macro'
+  children: MacroDeclarations[]
+  name: string
+  parameters: string[]
+}
+
+export type MacroDeclarations = Region | Media | Port | Link | Context | MacroCall
+
+export interface MacroCall extends AstNode {
+  $type: 'MacroCall'
+  $container?: Macro
+  arguments: PropertyValue[]
+  macro: Reference<Macro>
 }
 
 export interface Property extends AstNode {

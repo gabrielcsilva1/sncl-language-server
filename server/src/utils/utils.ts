@@ -85,3 +85,11 @@ export function makeReference<T extends AstNode>(token: IToken): Reference<T> {
     location: getLocationFromToken(token),
   }
 }
+
+export function isStringLiteral(value: string) {
+  return value.startsWith('"') && value.endsWith('"')
+}
+
+export function removeQuotes(value: string) {
+  return value.replace(/["']/g, '')
+}
