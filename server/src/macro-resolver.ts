@@ -276,6 +276,16 @@ function resolveMacroCall(
     }
   }
 
+  // Valida se a macro a ser chamada, já está na pilha, se estiver causará um loop.
+  const macroAlreadyCalled = stack.find((m) => m.macroId === macroCall.macro.$name)
+
+  if (macroAlreadyCalled) {
+    return left({
+      message: `Infinity recursion detected in macro '${macroCall.macro.$name}'.`,
+      location: macroCall.location,
+    })
+  }
+
   return resolveMacroBody(macroCall, stack, document)
 }
 

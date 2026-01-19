@@ -248,7 +248,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       name: children.Identifier[0].image,
       children: [],
       parameters: [],
-      location: getLocationFromToken(children.Identifier[0], children.End[0]),
+      location: getLocationFromToken(children.Identifier[0]),
     }
 
     element.parameters = children.Identifier.slice(1).map((token) => token.image)
