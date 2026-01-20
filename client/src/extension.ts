@@ -1,5 +1,5 @@
 import * as path from 'node:path'
-import type { ExtensionContext } from 'vscode'
+import * as vscode from 'vscode'
 
 import {
   LanguageClient,
@@ -7,10 +7,42 @@ import {
   type ServerOptions,
   TransportKind,
 } from 'vscode-languageclient/node'
+import { makeTerminalManager } from './terminal/terminal-factory'
+import type { TerminalManager } from './terminal/terminal-manager'
 
 let client: LanguageClient
+let terminalManager: TerminalManager
 
-export function activate(context: ExtensionContext) {
+export function activate(context: vscode.ExtensionContext) {
+  /**
+   * Registrando o comando para chamar o sncl via terminal.
+   */
+  terminalManager = makeTerminalManager(context)
+
+  const disposable = vscode.commands.registerCommand('sncl.compile', async () => {
+    const editor = vscode.window.activeTextEditor
+
+    if (!editor) {
+      vscode.window.showErrorMessage('Nenhum editor de texto ativo.')
+      return
+    }
+
+    const document = editor.document
+
+    if (document.languageId !== 'sncl') {
+      vscode.window.showErrorMessage('Abra um arquivo .sncl para compilar.')
+      return
+    }
+
+    await terminalManager.runSnclCommand(document.fileName)
+  })
+
+  context.subscriptions.push(disposable)
+  context.subscriptions.push(terminalManager)
+
+  /**
+   * Configuração do LSP
+   */
   // The server is implemented in node
   const serverModule = context.asAbsolutePath(path.join('server', 'out', 'server.js'))
 

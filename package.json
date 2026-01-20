@@ -11,6 +11,22 @@
   ],
   "main": "client/out/extension.js",
   "contributes": {
+    "menus": {
+      "editor/title": [
+        {
+          "command": "sncl.compile",
+          "when": "resourceLangId == sncl",
+          "group": "navigation"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "sncl.compile",
+        "title": "Compile sNCL",
+        "icon": "$(play)"
+      }
+    ],
     "grammars": [
       {
         "language": "sncl",
