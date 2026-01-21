@@ -9,7 +9,7 @@
   "categories": [
     "Other"
   ],
-  "main": "client/out/extension.js",
+  "main": "dist/extension.js",
   "contributes": {
     "menus": {
       "editor/title": [
@@ -45,9 +45,13 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -b",
-    "watch": "tsc -b -w",
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && node esbuild.js",
+    "watch": "npm run check-types && node esbuild.js",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && node esbuild.js --production",
+    "check-types": "tsc --noEmit",
     "gen:cst-types": "tsx server/scripts/generate-cst-types",
     "lint:check": "biome lint client server",
     "lint:format": "biome format --write client server",
@@ -59,6 +63,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.3.4",
     "@types/node": "^22.17.0",
+    "esbuild": "^0.27.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "tsx": "^4.20.6",

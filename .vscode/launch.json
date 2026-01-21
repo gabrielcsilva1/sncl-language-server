@@ -6,21 +6,18 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"type": "extensionHost",
-			"request": "launch",
-			"name": "Launch Client",
-			"runtimeExecutable": "${execPath}",
-			"args": ["--extensionDevelopmentPath=${workspaceRoot}"],
-			"outFiles": [
-				"${workspaceRoot}/client/out/**/*.js",
-				"${workspaceRoot}/server/out/**/*.js"
-			],
-			"autoAttachChildProcesses": true,
-			"preLaunchTask": {
-				"type": "npm",
-				"script": "watch"
-			}
-		},
+            "name": "Launch Client",
+            "type": "extensionHost",
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js" 
+            ],
+            "autoAttachChildProcesses": true,
+            "preLaunchTask": "${defaultBuildTask}"
+        },
 		{
 			"name": "tsx",
 			"type": "node",
