@@ -33,6 +33,7 @@ async function main() {
     },
     bundle: true,
     format: "cjs",
+    target: 'es2022',
     minify: production,
     sourcemap: !production,
     sourcesContent: false,
