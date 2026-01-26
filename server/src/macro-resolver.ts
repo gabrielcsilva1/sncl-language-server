@@ -15,7 +15,7 @@ import type {
 } from './@types/sncl-types'
 import type { ValidationError } from './parser/parser'
 import { getReference } from './references/linker'
-import type { AstNode, Reference } from './syntax-tree'
+import type { AstNode, Location, Reference } from './syntax-tree'
 import { isStringLiteral, removeQuotes } from './utils/utils'
 import type { SnclDocument } from './workspace/document'
 
@@ -39,6 +39,7 @@ function validRef<T extends AstNode>(reference: Reference<T>, stack: MacroStack)
   return {
     ...reference,
     $name: validValue(reference.$name, stack),
+    location: stack.rootCallLocation,
   }
 }
 
@@ -47,6 +48,7 @@ function resolvePort(port: Port, stack: MacroStack, document: SnclDocument): Por
     ...port,
     name: validValue(port.name, stack),
     component: validRef(port.component, stack),
+    location: stack.rootCallLocation,
   }
 
   if (port.interface !== undefined) {
@@ -62,6 +64,7 @@ function resolveArea(area: Area, stack: MacroStack, document: SnclDocument): Are
   const newElement: Area = {
     ...area,
     name: validValue(area.name, stack),
+    location: stack.rootCallLocation,
   }
 
   document.symbolTable.addElement(newElement)
@@ -73,6 +76,7 @@ function resolveMedia(media: Media, stack: MacroStack, document: SnclDocument): 
     ...media,
     name: validValue(media.name, stack),
     children: [],
+    location: stack.rootCallLocation,
   }
 
   if (media.rg !== undefined) {
@@ -92,6 +96,7 @@ function resolveRegion(region: Region, stack: MacroStack, document: SnclDocument
     ...region,
     name: validValue(region.name, stack),
     children: [],
+    location: stack.rootCallLocation,
   }
 
   for (const son of region.children) {
@@ -142,6 +147,7 @@ function resolveContext(context: Context, stack: MacroStack, document: SnclDocum
     ...context,
     name: validValue(context.name, stack),
     children: [],
+    location: stack.rootCallLocation,
   }
 
   for (const son of context.children) {
@@ -175,6 +181,7 @@ function resolveMacroBody(
   document: SnclDocument
 ): Either<ValidationError, Declaration[]> {
   const macro = document.symbolTable.getElement(macroCall.macro.$name) as Macro
+  const rootCallLocation: Location = stack.at(0)?.rootCallLocation ?? macroCall.location
 
   const parameters: Map<string, string> = new Map()
 
@@ -188,6 +195,7 @@ function resolveMacroBody(
   stack.push({
     macroId: macroCall.macro.$name,
     parameters: parameters,
+    rootCallLocation: rootCallLocation,
   })
 
   const declarations: Declaration[] = []
@@ -293,6 +301,7 @@ type MacroStack = {
   macroId: string
   // paramIdentifier: paramValue (argumentValue)
   parameters: Map<string, string>
+  rootCallLocation: Location
 }
 
 /**
