@@ -1,3 +1,4 @@
+import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { type ISnclDocumentFactory, type SnclDocument, SnclDocumentFactory } from './document'
 
 /**
@@ -9,7 +10,7 @@ export interface IWorkspaceManager {
    * @param uri - URI do documento que foi criado ou alterado
    * @param text - texto do documento.
    */
-  update(uri: string, text: string): SnclDocument
+  update(textDocument: TextDocument): SnclDocument
 
   /**
    * Método chamado quando um documento é deletado.
@@ -22,21 +23,21 @@ export class WorkspaceManager implements IWorkspaceManager {
   private readonly documentFactory: ISnclDocumentFactory
   private readonly snclDocuments: Map<string, SnclDocument>
 
-  constructor() {
+  constructor(snclDocuments: Map<string, SnclDocument>) {
     this.documentFactory = new SnclDocumentFactory()
-    this.snclDocuments = new Map()
+    this.snclDocuments = snclDocuments
   }
 
-  update(uri: string, text: string): SnclDocument {
-    let document = this.snclDocuments.get(uri)
+  update(textDocument: TextDocument): SnclDocument {
+    let document = this.snclDocuments.get(textDocument.uri)
 
     if (document === undefined) {
-      document = this.documentFactory.createFrom(uri, text)
+      document = this.documentFactory.createFrom(textDocument)
     }
 
-    this.documentFactory.update(document, text)
+    this.documentFactory.update(document, textDocument.getText())
 
-    this.snclDocuments.set(uri, document)
+    this.snclDocuments.set(textDocument.uri, document)
 
     return document
   }

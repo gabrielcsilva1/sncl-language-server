@@ -1,19 +1,20 @@
+import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { SnclDocument } from '../workspace/document'
 import { type IWorkspaceManager, WorkspaceManager } from '../workspace/workspace-manager'
 
 export class DocumentUpdateHandler {
   private readonly workspaceManager: IWorkspaceManager
 
-  constructor() {
-    this.workspaceManager = new WorkspaceManager()
+  constructor(snclDocuments: Map<string, SnclDocument>) {
+    this.workspaceManager = new WorkspaceManager(snclDocuments)
   }
 
-  onDocumentOpened(uri: string, text: string): SnclDocument {
-    return this.workspaceManager.update(uri, text)
+  onDocumentOpened(textDocument: TextDocument): SnclDocument {
+    return this.workspaceManager.update(textDocument)
   }
 
-  onDocumentChanged(uri: string, newText: string) {
-    return this.workspaceManager.update(uri, newText)
+  onDocumentChanged(textDocument: TextDocument) {
+    return this.workspaceManager.update(textDocument)
   }
 
   onDocumentDeleted(uri: string) {
