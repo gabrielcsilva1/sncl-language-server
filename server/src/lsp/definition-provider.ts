@@ -1,19 +1,19 @@
 import {
-  Range,
   type DefinitionParams,
+  Range,
   type Location as VSCodeLocation,
 } from 'vscode-languageserver'
-import type { SnclDocument } from '../workspace/document'
+import type { WorkspaceManager } from '../workspace/workspace-manager'
 
 export class DefinitionProvider {
-  private snclDocuments: Map<string, SnclDocument>
+  private workspaceManager: WorkspaceManager
 
-  constructor(snclDocuments: Map<string, SnclDocument>) {
-    this.snclDocuments = snclDocuments
+  constructor(workspaceManager: WorkspaceManager) {
+    this.workspaceManager = workspaceManager
   }
 
   findDeclaration({ textDocument, position }: DefinitionParams): VSCodeLocation | null {
-    const document = this.snclDocuments.get(textDocument.uri)
+    const document = this.workspaceManager.getDocument(textDocument.uri)
 
     if (!document) {
       return null

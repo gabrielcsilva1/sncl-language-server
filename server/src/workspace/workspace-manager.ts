@@ -4,31 +4,23 @@ import { type ISnclDocumentFactory, type SnclDocument, SnclDocumentFactory } fro
 /**
  * Serviço responsável por atualizar `SnclDocument` documentos.
  */
-export interface IWorkspaceManager {
-  /**
-   * Método chamado quando um documento é aberto ou alterado.
-   * @param uri - URI do documento que foi criado ou alterado
-   * @param text - texto do documento.
-   */
-  update(textDocument: TextDocument): SnclDocument
-
-  /**
-   * Método chamado quando um documento é deletado.
-   * @param uri - URI do documento excluído
-   */
-  delete(uri: string): void
-}
-
-export class WorkspaceManager implements IWorkspaceManager {
+export class WorkspaceManager {
   private readonly documentFactory: ISnclDocumentFactory
   private readonly snclDocuments: Map<string, SnclDocument>
 
-  constructor(snclDocuments: Map<string, SnclDocument>) {
+  constructor() {
     this.documentFactory = new SnclDocumentFactory()
-    this.snclDocuments = snclDocuments
+    this.snclDocuments = new Map()
   }
 
-  update(textDocument: TextDocument): SnclDocument {
+  getDocument(uri: string) {
+    return this.snclDocuments.get(uri)
+  }
+
+  /**
+   * Método chamado quando um documento é aberto ou alterado.
+   */
+  updateDocument(textDocument: TextDocument): SnclDocument {
     let document = this.snclDocuments.get(textDocument.uri)
 
     if (document === undefined) {
@@ -42,7 +34,11 @@ export class WorkspaceManager implements IWorkspaceManager {
     return document
   }
 
-  delete(uri: string): void {
+  /**
+   * Método chamado quando um documento é deletado.
+   * @param uri - URI do documento excluído
+   */
+  deleteDocument(uri: string): void {
     this.snclDocuments.delete(uri)
   }
 }
