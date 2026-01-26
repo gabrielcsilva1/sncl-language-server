@@ -77,7 +77,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       name,
       children: regions,
       properties,
-      location: getLocationFromToken(children.Region[0], children.End[0]),
+      location: getLocationFromToken(children.Identifier[0]),
     }
   }
 
@@ -109,7 +109,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       rg: rgRef,
       properties,
       children: areas,
-      location: getLocationFromToken(children.Media[0], children.End[0]),
+      location: getLocationFromToken(children.Identifier[0]),
     }
   }
 
@@ -122,7 +122,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       $type: 'Area',
       name: id,
       properties: properties,
-      location: getLocationFromToken(children.Area[0], children.End[0]),
+      location: getLocationFromToken(children.Identifier[0]),
     }
   }
 
@@ -138,7 +138,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       // O campo 'ref' será preenchido pelo Linker
       component: componentRef,
       interface: iface,
-      location: getLocationFromToken(children.Port[0], children.Identifier[1]),
+      location: getLocationFromToken(children.Identifier[0]),
     }
   }
 
@@ -147,7 +147,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       $type: 'Context',
       children: [],
       name: '',
-      location: getLocationFromToken(children.Context[0], children.End[0]),
+      location: getLocationFromToken(children.Identifier[0]),
     }
 
     element.name = children.Identifier[0].image
@@ -230,7 +230,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       $type: 'Property',
       key,
       $value: value,
-      location: getLocationFromToken(children.Identifier[0], children.value[0].children.Value[0]),
+      location: getLocationFromToken(children.Identifier[0]),
     }
   }
 

@@ -1,16 +1,33 @@
 import type { Declaration } from '../@types/sncl-types'
 import type { SymbolTable } from '../symbol-table'
+import type { Reference } from '../syntax-tree'
+import type { SnclDocument } from '../workspace/document'
 
-export function link(declarations: Declaration[], symbolTable: SymbolTable): void {
+export function link(document: SnclDocument): void {
+  linkRecursive(document, document.parseResult.value)
+}
+
+function doLink<T extends DeclarationTypes>(
+  ref: Reference,
+  document: SnclDocument,
+  targetTypes: T[]
+) {
+  const nodeRef = getReference(ref.$name, document.symbolTable, targetTypes)
+
+  ref.$ref = nodeRef
+
+  if (nodeRef) {
+    document.references.push(ref)
+  }
+}
+
+function linkRecursive(document: SnclDocument, declarations: Declaration[]) {
   for (const declaration of declarations) {
     if (declaration.$type === 'Media' && declaration.rg) {
-      declaration.rg.$ref = getReference(declaration.rg.$name, symbolTable, ['Region'])
+      doLink(declaration.rg, document, ['Region'])
     } else if (declaration.$type === 'Port') {
       // O componente referenciado pode ser uma mídia ou um contexto.
-      declaration.component.$ref = getReference(declaration.component.$name, symbolTable, [
-        'Media',
-        'Context',
-      ])
+      doLink(declaration.component, document, ['Media', 'Context'])
 
       // TODO: Realizar o link da propriedade interface
       // TODO: Verificar uma forma de fazer o link da interface quando o componente referenciar uma Media
@@ -20,15 +37,20 @@ export function link(declarations: Declaration[], symbolTable: SymbolTable): voi
 
       // Conditions
       for (const bind of declaration.conditions) {
-        bind.component.$ref = getReference(bind.component.$name, symbolTable, ['Media', 'Context'])
+        doLink(bind.component, document, ['Media', 'Context'])
       }
 
       // Actions
       for (const bind of declaration.actions) {
-        bind.component.$ref = getReference(bind.component.$name, symbolTable, ['Media', 'Context'])
+        doLink(bind.component, document, ['Media', 'Context'])
       }
     } else if (declaration.$type === 'Context') {
-      link(declaration.children, symbolTable)
+      linkRecursive(document, declaration.children)
+    } else if (declaration.$type === 'MacroCall') {
+      doLink(declaration.macro, document, ['Macro'])
+    } else if (declaration.$type === 'Macro') {
+      const macroCalls = declaration.children.filter((d) => d.$type === 'MacroCall')
+      linkRecursive(document, macroCalls)
     }
   }
 }
