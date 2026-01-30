@@ -17,7 +17,6 @@ import type {
   RegionCstChildren,
   ValueCstChildren,
 } from '../chevrotain/generated/cst-types'
-import type { Reference } from '../syntax-tree'
 import { getLocationFromToken, makeReference } from '../utils/utils'
 import { sNCLParser } from './parser'
 
@@ -82,35 +81,36 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
   }
 
   media(children: MediaCstChildren): ast.Media {
-    const name = children.Identifier[0].image
-    const properties: ast.Property[] = []
-    let rgRef: Reference<ast.Region> | undefined
+    const element: ast.Media = {
+      $type: 'Media',
+      name: children.Identifier[0].image,
+      properties: [],
+      children: [],
+      location: getLocationFromToken(children.Identifier[0]),
+    }
 
-    const areas = children.area?.map((area) => this.visit(area)) || []
+    element.children = children.area?.map((area) => this.visit(area)) || []
+
+    element.children.forEach((area) => {
+      area.$container = element
+    })
 
     for (const property of children.property || []) {
       const node = this.visit(property) as ast.Property
 
-      if (node.key === 'rg') {
-        rgRef = {
+      if (node.name === 'rg') {
+        element.rg = {
           $type: 'Reference',
           $name: node.$value.value,
           // O campo 'ref' será preenchido pelo Linker
           location: node.$value.location,
         }
       } else {
-        properties.push(node)
+        element.properties.push(node)
       }
     }
 
-    return {
-      $type: 'Media',
-      name,
-      rg: rgRef,
-      properties,
-      children: areas,
-      location: getLocationFromToken(children.Identifier[0]),
-    }
+    return element
   }
 
   area(children: AreaCstChildren): ast.Area {
@@ -210,7 +210,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
     const componentRef = makeReference<ast.ComponentRefTypes>(children.Identifier[0])
     const properties = (children.property || []).map((prop) => this.visit(prop))
 
-    const iface = children.Dot && makeReference<ast.Port>(children.Identifier[2])
+    const iface = children.Dot && makeReference<ast.Port>(children.Identifier[1])
 
     return {
       $type: 'Action',
@@ -228,7 +228,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
 
     return {
       $type: 'Property',
-      key,
+      name: key,
       $value: value,
       location: getLocationFromToken(children.Identifier[0]),
     }

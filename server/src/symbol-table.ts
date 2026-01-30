@@ -1,8 +1,10 @@
 import type { Area, Declaration } from './@types/sncl-types'
 import type { ValidationError } from './parser/parser'
 
+export type SymbolTableElements = Extract<Declaration, { name: string }> | Area
+
 export class SymbolTable {
-  private elements: Map<string | number, Declaration | Area>
+  private elements: Map<string, SymbolTableElements>
   private _duplicateErrors: ValidationError[] = []
 
   public constructor() {

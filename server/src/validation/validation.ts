@@ -2,6 +2,7 @@ import { type Either, left, right } from '../@types/either'
 import type * as ast from '../@types/sncl-types'
 import { identifierPatternExact } from '../chevrotain/tokens/generic'
 import type { ValidationError } from '../parser/parser'
+import type { AstNodeWithName } from '../syntax-tree'
 import type { SnclDocument } from '../workspace/document'
 
 export function validateDocument(document: SnclDocument): void {
@@ -92,6 +93,7 @@ const validate = {
 function validateComponentReference(
   element: ast.Port | ast.Action | ast.Condition
 ): Either<ValidationError, null> {
+  // Referencia do componente deve ter sido resolvida pelo Linker
   if (element.component.$ref === undefined) {
     return left({
       message: `Reference to undefined media or context: '${element.component.$name}'.`,
@@ -99,8 +101,15 @@ function validateComponentReference(
     })
   }
 
-  const node = element.$type === 'Port' ? element : (element.$container as ast.Link)
+  let node: ast.Port | ast.Link
 
+  if (element.$type === 'Action' || element.$type === 'Condition') {
+    node = element.$container as ast.Link
+  } else {
+    node = element
+  }
+
+  // O componente referenciado e o nó devem pertencer ao mesmo contexto
   if (!isInSameContext(node, element.component.$ref)) {
     return left({
       message: `Component '${element.component.$name}' is not in the same context.`,
@@ -108,7 +117,35 @@ function validateComponentReference(
     })
   }
 
-  // TODO: Validar interface. Primeiro deve resolver o link.
+  // Encerrar a validação caso não haja interface
+  if (element.interface === undefined) {
+    return right(null)
+  }
+
+  // Referencia da interface deve ter sido resolvida pelo Linker
+  if (element.interface.$ref === undefined) {
+    return left({
+      message: `Reference to undefined interface: '${element.component.$name}'.`,
+      location: element.interface.location,
+    })
+  }
+
+  const interfaceRef = element.interface.$ref
+  const componentRef = element.component.$ref
+
+  // Interface pode ser Porperty, Area ou Port
+  if (interfaceRef.$type !== 'Property') {
+    // A interface deve ser filha do component
+    if (
+      !interfaceRef.$container ||
+      componentRef.name !== (interfaceRef.$container as AstNodeWithName).name
+    ) {
+      return left({
+        message: `'${element.interface.$name}' is not an valid interface of ${componentRef.name}.`,
+        location: element.interface.location,
+      })
+    }
+  }
 
   return right(null)
 }

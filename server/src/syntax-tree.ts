@@ -20,11 +20,13 @@ export interface Location {
   endOffset: number
 }
 
+export type AstNodeWithName = AstNode & { name: string }
+
 /**
  * Uma interface que representar uma referência a outro elemento ({@link AstNode}).
  * A referência pode ou não ser resolvida.
  *  */
-export interface Reference<T extends AstNode = AstNode> {
+export interface Reference<T extends AstNodeWithName = AstNodeWithName> {
   $type: 'Reference'
 
   /** O identificador do elemento */

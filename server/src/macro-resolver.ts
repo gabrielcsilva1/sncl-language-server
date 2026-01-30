@@ -15,7 +15,7 @@ import type {
 } from './@types/sncl-types'
 import type { ValidationError } from './parser/parser'
 import { getReference } from './references/linker'
-import type { AstNode, Location, Reference } from './syntax-tree'
+import type { AstNodeWithName, Location, Reference } from './syntax-tree'
 import { isStringLiteral, removeQuotes } from './utils/utils'
 import type { SnclDocument } from './workspace/document'
 
@@ -35,7 +35,10 @@ function validValue(value: string, stack: MacroStack) {
  * Se o nome ($name) da referência for um parâmetro da Macro, retorna o seu respectivo valor,
  * caso contrário retorna a própria string.
  */
-function validRef<T extends AstNode>(reference: Reference<T>, stack: MacroStack): Reference<T> {
+function validRef<T extends AstNodeWithName>(
+  reference: Reference<T>,
+  stack: MacroStack
+): Reference<T> {
   return {
     ...reference,
     $name: validValue(reference.$name, stack),
@@ -85,6 +88,7 @@ function resolveMedia(media: Media, stack: MacroStack, document: SnclDocument): 
 
   for (const area of media.children) {
     newElement.children.push(resolveArea(area, stack, document))
+    area.$container = newElement
   }
 
   document.symbolTable.addElement(newElement)
@@ -234,7 +238,7 @@ function resolveMacroCall(
   stack: Array<MacroStack>,
   document: SnclDocument
 ): Either<ValidationError, Declaration[]> {
-  const macro = getReference(macroCall.macro.$name, document.symbolTable, ['Macro'])
+  const macro = getReference(macroCall.macro, document.symbolTable, ['Macro'])
   const lastMacroCalled = stack.at(-1)
 
   // Valida se a macro foi definida

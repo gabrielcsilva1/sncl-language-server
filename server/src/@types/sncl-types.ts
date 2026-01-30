@@ -85,7 +85,7 @@ export interface MacroCall extends AstNode {
 
 export interface Property extends AstNode {
   $type: 'Property'
-  key: string
+  name: string
   $value: PropertyValue
 }
 
@@ -109,4 +109,4 @@ export type ComponentRefTypes = Media | Context
  * Tipos que podem ser referenciados pelo campo `interface` de
  * uma {@link Port}, {@link Action} ou {@link Condition}
  */
-export type InterfaceRefTypes = Port | Property
+export type InterfaceRefTypes = Port | Property | Area
