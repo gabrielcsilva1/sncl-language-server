@@ -11,6 +11,8 @@ export interface AstNode {
    */
   $container?: AstNode
 
+  isVirtual?: boolean
+
   /** Localização de onde começa e termina nó */
   location: Location
 }
@@ -26,7 +28,7 @@ export type AstNodeWithName = AstNode & { name: string }
  * Uma interface que representar uma referência a outro elemento ({@link AstNode}).
  * A referência pode ou não ser resolvida.
  *  */
-export interface Reference<T extends AstNodeWithName = AstNodeWithName> {
+export interface Reference<T extends AstNodeWithName = AstNodeWithName> extends AstNode {
   $type: 'Reference'
 
   /** O identificador do elemento */
@@ -37,6 +39,4 @@ export interface Reference<T extends AstNodeWithName = AstNodeWithName> {
    * fica com o valor `undefined`.
    * */
   $ref?: T
-
-  location: Location
 }

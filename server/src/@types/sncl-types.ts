@@ -19,7 +19,7 @@ export interface Region extends AstNode {
 export interface Media extends AstNode {
   $type: 'Media'
   name: string
-  rg?: Reference<Region>
+  rg?: Reference<Region | Parameter>
   properties: Property[]
   children: Area[]
 }
@@ -55,14 +55,14 @@ export interface Link extends AstNode {
 export interface Condition extends AstNode {
   $type: 'Condition'
   role: string
-  component: Reference<Media | Context>
+  component: Reference<ComponentRefTypes>
   interface?: Reference<InterfaceRefTypes>
 }
 
 export interface Action extends AstNode {
   $type: 'Action'
   role: string
-  component: Reference<Media | Context>
+  component: Reference<ComponentRefTypes>
   interface?: Reference<InterfaceRefTypes>
   properties: Property[]
 }
@@ -71,7 +71,7 @@ export interface Macro extends AstNode {
   $type: 'Macro'
   children: MacroDeclarations[]
   name: string
-  parameters: string[]
+  parameters: Parameter[]
 }
 
 export type MacroDeclarations = Region | Media | Port | Link | Context | MacroCall
@@ -89,10 +89,15 @@ export interface Property extends AstNode {
   $value: PropertyValue
 }
 
+export interface Parameter extends AstNode {
+  $type: 'Parameter'
+  name: string
+}
+
 // Tipos para os valores das propriedades
 export interface PropertyValue extends AstNode {
   $type: 'Value'
-  value: string
+  name: string
 }
 
 /**********************************************
@@ -103,10 +108,10 @@ export interface PropertyValue extends AstNode {
  * Tipos que podem ser referenciados pelo campo `component` de
  * uma {@link Port}, {@link Action} ou {@link Condition}
  * */
-export type ComponentRefTypes = Media | Context
+export type ComponentRefTypes = Media | Context | Parameter
 
 /**
  * Tipos que podem ser referenciados pelo campo `interface` de
  * uma {@link Port}, {@link Action} ou {@link Condition}
  */
-export type InterfaceRefTypes = Port | Property | Area
+export type InterfaceRefTypes = Port | Property | Area | Parameter
