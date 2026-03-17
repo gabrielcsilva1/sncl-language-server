@@ -1,17 +1,7 @@
-import type { ILexingError, IRecognitionException, IToken } from 'chevrotain'
+import type { ILexingError, IRecognitionException } from 'chevrotain'
 import { type Diagnostic, DiagnosticSeverity } from 'vscode-languageserver'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ValidationError } from '../parser/parser'
-import type { AstNodeWithName, Location, Reference } from '../syntax-tree'
-
-export function getLocationFromToken(startNode: IToken, endNode?: IToken): Location {
-  endNode = endNode ?? startNode
-
-  return {
-    startOffset: startNode.startOffset,
-    endOffset: endNode.startOffset + endNode.image.length,
-  }
-}
 
 export function getValidationErrorsFromLexing(errors: ILexingError[]): ValidationError[] {
   const validationErrors: ValidationError[] = []
@@ -69,20 +59,6 @@ export function convertErrorToDiagnostic(
     range: { start, end },
     message: error.message,
     source: 'sNCL Language Server',
-  }
-}
-
-/**
- * Cria um objeto do tipo {@link Reference}.
- * @template T - Tipo do nó, no qual a referência é feita.
- * @param token - Token que vai ser extraído as informações do id e localização da referência
- */
-export function makeReference<T extends AstNodeWithName>(token: IToken): Reference<T> {
-  return {
-    $type: 'Reference',
-    $name: token.image,
-    // O campo $ref é preenchido pelo Linker
-    location: getLocationFromToken(token),
   }
 }
 

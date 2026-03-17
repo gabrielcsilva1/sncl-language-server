@@ -13,11 +13,10 @@ import type {
   Port,
   Region,
 } from './@types/sncl-types'
-import type { ValidationError } from './parser/parser'
-import { getReference } from './references/linker'
+import type { ParseResult, ValidationError } from './parser/parser'
 import type { AstNodeWithName, Location, Reference } from './syntax-tree'
+import { isMacro } from './utils/ast-utils'
 import { isStringLiteral, removeQuotes } from './utils/utils'
-import type { SnclDocument } from './workspace/document'
 
 /**
  * Se o valor passado for um parâmetro da Macro, retorna o seu respectivo valor,
@@ -43,43 +42,44 @@ function validRef<T extends AstNodeWithName>(
     ...reference,
     $name: validValue(reference.$name, stack),
     location: stack.rootCallLocation,
+    isVirtual: true,
   }
 }
 
-function resolvePort(port: Port, stack: MacroStack, document: SnclDocument): Port {
+function resolvePort(port: Port, stack: MacroStack): Port {
   const newElement: Port = {
     ...port,
     name: validValue(port.name, stack),
     component: validRef(port.component, stack),
     location: stack.rootCallLocation,
+    isVirtual: true,
   }
 
   if (port.interface !== undefined) {
     port.interface = validRef(port.interface, stack)
   }
 
-  document.symbolTable.addElement(newElement)
-
   return newElement
 }
 
-function resolveArea(area: Area, stack: MacroStack, document: SnclDocument): Area {
+function resolveArea(area: Area, stack: MacroStack): Area {
   const newElement: Area = {
     ...area,
     name: validValue(area.name, stack),
     location: stack.rootCallLocation,
+    isVirtual: true,
   }
 
-  document.symbolTable.addElement(newElement)
   return newElement
 }
 
-function resolveMedia(media: Media, stack: MacroStack, document: SnclDocument): Media {
+function resolveMedia(media: Media, stack: MacroStack): Media {
   const newElement: Media = {
     ...media,
     name: validValue(media.name, stack),
     children: [],
     location: stack.rootCallLocation,
+    isVirtual: true,
   }
 
   if (media.rg !== undefined) {
@@ -87,27 +87,26 @@ function resolveMedia(media: Media, stack: MacroStack, document: SnclDocument): 
   }
 
   for (const area of media.children) {
-    newElement.children.push(resolveArea(area, stack, document))
+    newElement.children.push(resolveArea(area, stack))
     area.$container = newElement
   }
 
-  document.symbolTable.addElement(newElement)
   return newElement
 }
 
-function resolveRegion(region: Region, stack: MacroStack, document: SnclDocument): Region {
+function resolveRegion(region: Region, stack: MacroStack): Region {
   const newElement: Region = {
     ...region,
     name: validValue(region.name, stack),
     children: [],
     location: stack.rootCallLocation,
+    isVirtual: true,
   }
 
   for (const son of region.children) {
-    newElement.children.push(resolveRegion(son, stack, document))
+    newElement.children.push(resolveRegion(son, stack))
   }
 
-  document.symbolTable.addElement(newElement)
   return newElement
 }
 
@@ -115,6 +114,7 @@ function resolveBind(bind: Action | Condition, stack: MacroStack) {
   const newElement: Action | Condition = {
     ...bind,
     component: validRef(bind.component, stack),
+    isVirtual: true,
   }
 
   if (bind.interface !== undefined) {
@@ -129,6 +129,7 @@ function resolveLink(link: Link, stack: MacroStack): Link {
     ...link,
     actions: [],
     conditions: [],
+    isVirtual: true,
   }
 
   for (const condition of link.conditions) {
@@ -146,31 +147,31 @@ function resolveLink(link: Link, stack: MacroStack): Link {
   return newElement
 }
 
-function resolveContext(context: Context, stack: MacroStack, document: SnclDocument): Context {
+function resolveContext(context: Context, stack: MacroStack): Context {
   const newElement: Context = {
     ...context,
     name: validValue(context.name, stack),
     children: [],
     location: stack.rootCallLocation,
+    isVirtual: true,
   }
 
   for (const son of context.children) {
-    newElement.children.push(resolveContextBody(son, stack, document))
+    newElement.children.push(resolveContextBody(son, stack))
   }
 
-  document.symbolTable.addElement(newElement)
   return newElement
 }
 
-function resolveContextBody(element: ContextBody, stack: MacroStack, document: SnclDocument) {
+function resolveContextBody(element: ContextBody, stack: MacroStack) {
   if (element.$type === 'Media') {
-    return resolveMedia(element, stack, document)
+    return resolveMedia(element, stack)
   }
   if (element.$type === 'Port') {
-    return resolvePort(element, stack, document)
+    return resolvePort(element, stack)
   }
   if (element.$type === 'Context') {
-    return resolveContext(element, stack, document)
+    return resolveContext(element, stack)
   }
 
   return resolveLink(element, stack)
@@ -182,17 +183,19 @@ function resolveContextBody(element: ContextBody, stack: MacroStack, document: S
 function resolveMacroBody(
   macroCall: MacroCall,
   stack: Array<MacroStack>,
-  document: SnclDocument
+  parseResult: ParseResult<Declaration[]>
 ): Either<ValidationError, Declaration[]> {
-  const macro = document.symbolTable.getElement(macroCall.macro.$name) as Macro
+  const macro = parseResult.value.find(
+    (decl) => isMacro(decl) && decl.name === macroCall.macro.$name
+  ) as Macro
   const rootCallLocation: Location = stack.at(0)?.rootCallLocation ?? macroCall.location
 
   const parameters: Map<string, string> = new Map()
 
   let index = 0
-  for (const paramName of macro.parameters) {
-    const value = removeQuotes(macroCall.arguments[index].value)
-    parameters.set(paramName, value)
+  for (const param of macro.parameters) {
+    const value = removeQuotes(macroCall.arguments[index].name)
+    parameters.set(param.name, value)
     index += 1
   }
 
@@ -206,19 +209,19 @@ function resolveMacroBody(
 
   for (const son of macro.children) {
     if (son.$type === 'MacroCall') {
-      const result = resolveMacroCall(son, stack, document)
+      const result = resolveMacroCall(son, stack, parseResult)
       if (result.isLeft()) {
         return result
       }
       declarations.push(...result.value)
     } else if (son.$type === 'Port') {
-      declarations.push(resolvePort(son, stack[stack.length - 1], document))
+      declarations.push(resolvePort(son, stack[stack.length - 1]))
     } else if (son.$type === 'Media') {
-      declarations.push(resolveMedia(son, stack[stack.length - 1], document))
+      declarations.push(resolveMedia(son, stack[stack.length - 1]))
     } else if (son.$type === 'Region') {
-      declarations.push(resolveRegion(son, stack[stack.length - 1], document))
+      declarations.push(resolveRegion(son, stack[stack.length - 1]))
     } else if (son.$type === 'Context') {
-      declarations.push(resolveContext(son, stack[stack.length - 1], document))
+      declarations.push(resolveContext(son, stack[stack.length - 1]))
     } else if (son.$type === 'Link') {
       declarations.push(resolveLink(son, stack[stack.length - 1]))
     }
@@ -236,9 +239,11 @@ function resolveMacroBody(
 function resolveMacroCall(
   macroCall: MacroCall,
   stack: Array<MacroStack>,
-  document: SnclDocument
+  parseResult: ParseResult<Declaration[]>
 ): Either<ValidationError, Declaration[]> {
-  const macro = getReference(macroCall.macro, document.symbolTable, ['Macro'])
+  const macro = parseResult.value.find(
+    (decl): decl is Macro => isMacro(decl) && decl.name === macroCall.macro.$name
+  )
   const lastMacroCalled = stack.at(-1)
 
   // Valida se a macro foi definida
@@ -261,27 +266,40 @@ function resolveMacroCall(
    * Para cada argumento verificar se ele foi passado como string literal ou através de um
    * identificador.
    */
+  const macroCallCopy: MacroCall = {
+    ...macroCall,
+    arguments: [],
+    location: {
+      ...macroCall.location,
+    },
+  }
 
   for (const argument of macroCall.arguments) {
     // Caso seja uma string literal, remover as aspas.
-    if (isStringLiteral(argument.value)) {
-      argument.value = removeQuotes(argument.value)
+    if (isStringLiteral(argument.name)) {
+      macroCallCopy.arguments.push({
+        ...argument,
+        name: removeQuotes(argument.name),
+      })
     } else {
       // Caso seja um identificador, ele deve existir como parâmetro da macro pai (última macro da pilha).
       if (lastMacroCalled) {
-        const value = lastMacroCalled.parameters.get(argument.value)
+        const value = lastMacroCalled.parameters.get(argument.name)
 
         if (value !== undefined) {
-          argument.value = value
+          macroCallCopy.arguments.push({
+            ...argument,
+            name: value,
+          })
         } else {
           return left({
-            message: `Argument '${argument.value}' is not a parameter of macro '${macro.name}'.`,
+            message: `Argument '${argument.name}' is not a parameter of macro '${macro.name}'.`,
             location: argument.location,
           })
         }
       } else {
         return left({
-          message: `Argument ${argument.value} is invalid. Did you mean "${argument.value}"?`,
+          message: `Argument ${argument.name} is invalid. Did you mean "${argument.name}"?`,
           location: argument.location,
         })
       }
@@ -298,7 +316,7 @@ function resolveMacroCall(
     })
   }
 
-  return resolveMacroBody(macroCall, stack, document)
+  return resolveMacroBody(macroCallCopy, stack, parseResult)
 }
 
 type MacroStack = {
@@ -314,17 +332,17 @@ type MacroStack = {
  * @param document - Documento já processado pela fase de Parsing e com a tabela de símbolos
  * previamente construída.
  */
-export function processMacroCall(document: SnclDocument) {
-  const macroCalls = document.parseResult.value.filter((decl) => decl.$type === 'MacroCall')
+export function processMacroCall(parseResult: ParseResult<Declaration[]>) {
+  const macroCalls = parseResult.value.filter((decl) => decl.$type === 'MacroCall')
 
   for (const macroCall of macroCalls) {
     const stack: Array<MacroStack> = []
-    const result = resolveMacroCall(macroCall, stack, document)
+    const result = resolveMacroCall(macroCall, stack, parseResult)
 
     if (result.isLeft()) {
-      document.parseResult.errors.push(result.value)
+      parseResult.errors.push(result.value)
     } else {
-      document.parseResult.value.push(...result.value)
+      parseResult.value.push(...result.value)
     }
   }
 }

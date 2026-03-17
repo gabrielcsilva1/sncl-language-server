@@ -193,7 +193,7 @@ export interface MacroCallCstNode extends CstNode {
 export type MacroCallCstChildren = {
   Identifier: IToken[]
   LParen: IToken[]
-  value?: ValueCstNode[]
+  Value?: IToken[]
   Comma?: IToken[]
   RParen: IToken[]
 }

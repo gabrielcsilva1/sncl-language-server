@@ -202,7 +202,7 @@ export class SnclParser extends CstParser {
     this.MANY_SEP({
       SEP: Comma,
       DEF: () => {
-        this.SUBRULE(this.value)
+        this.CONSUME(Value)
       },
     })
 

@@ -17,7 +17,12 @@ import type {
   RegionCstChildren,
   ValueCstChildren,
 } from '../chevrotain/generated/cst-types'
-import { getLocationFromToken, makeReference } from '../utils/utils'
+import {
+  getLocationFromToken,
+  makeArgument,
+  makeParameter,
+  makeReference,
+} from '../utils/ast-utils'
 import { sNCLParser } from './parser'
 
 const BaseCstVisitor = sNCLParser.getBaseCstVisitorConstructor()
@@ -101,7 +106,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       if (node.name === 'rg') {
         element.rg = {
           $type: 'Reference',
-          $name: node.$value.value,
+          $name: node.$value.name,
           // O campo 'ref' será preenchido pelo Linker
           location: node.$value.location,
         }
@@ -237,7 +242,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
   value(children: ValueCstChildren): ast.PropertyValue {
     return {
       $type: 'Value',
-      value: children.Value[0].image,
+      name: children.Value[0].image,
       location: getLocationFromToken(children.Value[0]),
     }
   }
@@ -251,7 +256,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
       location: getLocationFromToken(children.Identifier[0]),
     }
 
-    element.parameters = children.Identifier.slice(1).map((token) => token.image)
+    element.parameters = children.Identifier.slice(1).map((token) => makeParameter(token))
 
     const macroDeclarations = (children.macroDeclaration || [])
       .map((decl) => this.visit(decl))
@@ -281,7 +286,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
   }
 
   macroCall(children: MacroCallCstChildren): ast.MacroCall {
-    const args = children.value?.map((value) => this.visit(value)) || []
+    const args = children.Value?.map((value) => makeArgument(value)) || []
 
     return {
       $type: 'MacroCall',

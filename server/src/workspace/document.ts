@@ -55,6 +55,8 @@ export class SnclDocumentFactory implements ISnclDocumentFactory {
     const text = textDocument.getText()
 
     const parseResult = this.parserService.parse(text)
+    processMacroCall(parseResult)
+
     const symbolTable = new SymbolTable()
     symbolTable.update(parseResult.value)
 
@@ -67,8 +69,6 @@ export class SnclDocumentFactory implements ISnclDocumentFactory {
       references: [],
     }
 
-    processMacroCall(document)
-
     return document
   }
 
@@ -77,9 +77,9 @@ export class SnclDocumentFactory implements ISnclDocumentFactory {
     if (document.text !== newText) {
       document.text = newText
       document.parseResult = this.parserService.parse(newText)
+      processMacroCall(document.parseResult)
+
       document.symbolTable.update(document.parseResult.value)
-      document.references = []
-      processMacroCall(document)
     }
 
     // 2. Linking
