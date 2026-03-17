@@ -266,18 +266,31 @@ function resolveMacroCall(
    * Para cada argumento verificar se ele foi passado como string literal ou através de um
    * identificador.
    */
+  const macroCallCopy: MacroCall = {
+    ...macroCall,
+    arguments: [],
+    location: {
+      ...macroCall.location,
+    },
+  }
 
   for (const argument of macroCall.arguments) {
     // Caso seja uma string literal, remover as aspas.
     if (isStringLiteral(argument.name)) {
-      argument.name = removeQuotes(argument.name)
+      macroCallCopy.arguments.push({
+        ...argument,
+        name: removeQuotes(argument.name),
+      })
     } else {
       // Caso seja um identificador, ele deve existir como parâmetro da macro pai (última macro da pilha).
       if (lastMacroCalled) {
         const value = lastMacroCalled.parameters.get(argument.name)
 
         if (value !== undefined) {
-          argument.name = value
+          macroCallCopy.arguments.push({
+            ...argument,
+            name: value,
+          })
         } else {
           return left({
             message: `Argument '${argument.name}' is not a parameter of macro '${macro.name}'.`,
@@ -303,7 +316,7 @@ function resolveMacroCall(
     })
   }
 
-  return resolveMacroBody(macroCall, stack, parseResult)
+  return resolveMacroBody(macroCallCopy, stack, parseResult)
 }
 
 type MacroStack = {

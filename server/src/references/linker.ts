@@ -1,6 +1,7 @@
 import type {
   Action,
   Area,
+  Argument,
   Condition,
   Context,
   Declaration,
@@ -20,6 +21,8 @@ import type { SnclDocument } from '../workspace/document'
 import type { Scope } from './scope'
 
 export function link(document: SnclDocument): void {
+  document.references = []
+
   const linker = new Linker()
 
   linker.link(document)
@@ -159,7 +162,7 @@ class Linker extends LinkerBase {
     this.visitValue(node.$value, params)
   }
 
-  protected visitValue(node: PropertyValue, params: LinkerParams) {
+  protected visitValue(node: PropertyValue | Argument, params: LinkerParams) {
     const { document, currentScope } = params
 
     // O valor pode ser referência a um parâmetro
@@ -177,6 +180,10 @@ class Linker extends LinkerBase {
     if (node.macro.$ref) {
       document.references.push(node.macro)
     }
+
+    node.arguments.forEach((arg) => {
+      this.visitValue(arg, params)
+    })
   }
 
   protected visitMacro(node: Macro, params: LinkerParams) {

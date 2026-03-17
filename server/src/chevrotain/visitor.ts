@@ -17,7 +17,12 @@ import type {
   RegionCstChildren,
   ValueCstChildren,
 } from '../chevrotain/generated/cst-types'
-import { getLocationFromToken, makeParameter, makeReference } from '../utils/ast-utils'
+import {
+  getLocationFromToken,
+  makeArgument,
+  makeParameter,
+  makeReference,
+} from '../utils/ast-utils'
 import { sNCLParser } from './parser'
 
 const BaseCstVisitor = sNCLParser.getBaseCstVisitorConstructor()
@@ -281,7 +286,7 @@ class SnclVisitor extends BaseCstVisitor implements ISnclNodeVisitor<void, unkno
   }
 
   macroCall(children: MacroCallCstChildren): ast.MacroCall {
-    const args = children.value?.map((value) => this.visit(value)) || []
+    const args = children.Value?.map((value) => makeArgument(value)) || []
 
     return {
       $type: 'MacroCall',

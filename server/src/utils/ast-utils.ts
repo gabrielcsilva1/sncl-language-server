@@ -2,6 +2,7 @@ import type { IToken } from 'chevrotain'
 import type {
   Action,
   Area,
+  Argument,
   Condition,
   Context,
   Declaration,
@@ -24,6 +25,15 @@ import type { AstNode, AstNodeWithName, Location, Reference } from '../syntax-tr
 export function makeParameter(token: IToken): Parameter {
   return {
     $type: 'Parameter',
+    name: token.image,
+    // O campo $ref é preenchido pelo Linker
+    location: getLocationFromToken(token),
+  }
+}
+
+export function makeArgument(token: IToken): Argument {
+  return {
+    $type: 'Argument',
     name: token.image,
     // O campo $ref é preenchido pelo Linker
     location: getLocationFromToken(token),

@@ -79,7 +79,7 @@ export type MacroDeclarations = Region | Media | Port | Link | Context | MacroCa
 export interface MacroCall extends AstNode {
   $type: 'MacroCall'
   $container?: Macro
-  arguments: PropertyValue[]
+  arguments: Argument[]
   macro: Reference<Macro>
 }
 
@@ -92,6 +92,11 @@ export interface Property extends AstNode {
 export interface Parameter extends AstNode {
   $type: 'Parameter'
   name: string
+}
+
+export interface Argument extends AstNode {
+  $type: 'Argument'
+  readonly name: string
 }
 
 // Tipos para os valores das propriedades

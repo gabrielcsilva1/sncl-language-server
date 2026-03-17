@@ -80,7 +80,6 @@ export class SnclDocumentFactory implements ISnclDocumentFactory {
       processMacroCall(document.parseResult)
 
       document.symbolTable.update(document.parseResult.value)
-      document.references = []
     }
 
     // 2. Linking
