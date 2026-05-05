@@ -23,6 +23,9 @@ connection.onInitialize((_: InitializeParams) => {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       definitionProvider: true,
+      renameProvider: {
+        prepareProvider: true,
+      },
     },
   }
 

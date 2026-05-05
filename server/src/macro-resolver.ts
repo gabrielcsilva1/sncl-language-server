@@ -41,7 +41,8 @@ function validRef<T extends AstNodeWithName>(
   return {
     ...reference,
     $name: validValue(reference.$name, stack),
-    location: stack.rootCallLocation,
+    // location: stack.rootCallLocation,
+    location: { ...reference.location },
     isVirtual: true,
   }
 }
@@ -51,7 +52,8 @@ function resolvePort(port: Port, stack: MacroStack): Port {
     ...port,
     name: validValue(port.name, stack),
     component: validRef(port.component, stack),
-    location: stack.rootCallLocation,
+    // location: stack.rootCallLocation,
+    location: { ...port.location },
     isVirtual: true,
   }
 
@@ -66,7 +68,8 @@ function resolveArea(area: Area, stack: MacroStack): Area {
   const newElement: Area = {
     ...area,
     name: validValue(area.name, stack),
-    location: stack.rootCallLocation,
+    // location: stack.rootCallLocation,
+    location: { ...area.location },
     isVirtual: true,
   }
 
@@ -78,7 +81,9 @@ function resolveMedia(media: Media, stack: MacroStack): Media {
     ...media,
     name: validValue(media.name, stack),
     children: [],
-    location: stack.rootCallLocation,
+    properties: [],
+    // location: stack.rootCallLocation,
+    location: { ...media.location },
     isVirtual: true,
   }
 
@@ -91,6 +96,13 @@ function resolveMedia(media: Media, stack: MacroStack): Media {
     area.$container = newElement
   }
 
+  for (const property of media.properties) {
+    newElement.properties.push({
+      ...property,
+      isVirtual: true,
+    })
+  }
+
   return newElement
 }
 
@@ -99,7 +111,8 @@ function resolveRegion(region: Region, stack: MacroStack): Region {
     ...region,
     name: validValue(region.name, stack),
     children: [],
-    location: stack.rootCallLocation,
+    // location: stack.rootCallLocation,
+    location: { ...region.location },
     isVirtual: true,
   }
 
@@ -152,7 +165,8 @@ function resolveContext(context: Context, stack: MacroStack): Context {
     ...context,
     name: validValue(context.name, stack),
     children: [],
-    location: stack.rootCallLocation,
+    // location: stack.rootCallLocation,
+    location: { ...context.location },
     isVirtual: true,
   }
 

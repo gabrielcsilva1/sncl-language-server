@@ -55,6 +55,23 @@ export function makeReference<T extends AstNodeWithName>(token: IToken): Referen
   }
 }
 
+/**
+ * Verifica se o offset informado está dentro da localização do nó
+ * (entre o offset de início e fim).
+ *
+ * @example
+ * const node: AstNode = {
+ *  // ...
+ *  location: {startOffset: 220, endOffset: 230}
+ * }
+ *
+ * isAtOffset(node, 225) // return true
+ * isAtOffset(node, 240) // return false
+ */
+export function isNodeAtOffset(node: AstNode, offset: number) {
+  return node.location.startOffset <= offset && node.location.endOffset >= offset
+}
+
 export function getLocationFromToken(startNode: IToken, endNode?: IToken): Location {
   endNode = endNode ?? startNode
 
