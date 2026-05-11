@@ -3,7 +3,7 @@ This project is a small language server that provides IDE functionality for the 
 
 The project consists of a TypeScript extension for VS Code. On the server side, the document parsing is done using the [Chevrotain](https://chevrotain.io/docs/) library, which allows defining tokens and writing grammar in JavaScript syntax, in addition to having TypeScript support.
 
-Currently sncl-language-server features include syntax-highlighting and diagnostics.
+Currently sncl-language-server features include syntax-highlighting, diagnostics, go-to-definition and rename.
 
 ## Development using VSCode
 1. `npm i`
@@ -19,4 +19,7 @@ Currently sncl-language-server features include syntax-highlighting and diagnost
 - [x] go to definition
 
 <img width="1046" height="798" alt="go-to-definition" src="https://github.com/user-attachments/assets/fc046959-ea01-41fe-81da-793d667227be" />
+
+- [x] rename
+<img width="1046" height="798" alt="rename-provider" src="https://github.com/user-attachments/assets/a194c823-c3f3-4db3-9fa1-87b76d70a961" />
 
