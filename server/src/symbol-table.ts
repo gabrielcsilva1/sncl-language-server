@@ -2,6 +2,7 @@ import type { Area, Declaration } from './@types/sncl-types'
 import type { ValidationError } from './parser/parser'
 import { Scope } from './references/scope'
 import type { AstNodeWithName } from './syntax-tree'
+import { makeValidationError } from './utils/utils'
 
 export class SymbolTable {
   private _globalScope: Scope
@@ -26,10 +27,9 @@ export class SymbolTable {
 
       // 1- Verifica se já existe um elemento com o mesmo nome
       if (this.nodeScopes.get(element.name)) {
-        this._duplicateErrors.push({
-          message: `Duplicated identifier: ${element.name}`,
-          location: element.location,
-        })
+        this._duplicateErrors.push(
+          makeValidationError(element, `Duplicated identifier: ${element.name}`)
+        )
         continue
       }
 

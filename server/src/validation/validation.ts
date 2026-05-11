@@ -10,6 +10,7 @@ import type {
 import { identifierPatternExact } from '../chevrotain/tokens/generic'
 import type { AstNode } from '../syntax-tree'
 import { isContext } from '../utils/ast-utils'
+import { makeValidationError } from '../utils/utils'
 import type { SnclDocument } from '../workspace/document'
 
 export function validateDocument(document: SnclDocument): void {
@@ -62,15 +63,13 @@ class SnclValidator extends ValidatorBase {
       const referenceFound = Boolean(media.rg.$ref)
 
       if (!isIdentifier) {
-        document.parseResult.errors.push({
-          message: `The 'rg' property must reference a region identifier.`,
-          location: media.rg.location,
-        })
+        document.parseResult.errors.push(
+          makeValidationError(media.rg, `The 'rg' property must reference a region identifier.`)
+        )
       } else if (!referenceFound) {
-        document.parseResult.errors.push({
-          message: `Reference to undefined region: '${media.rg.$name}'.`,
-          location: media.rg.location,
-        })
+        document.parseResult.errors.push(
+          makeValidationError(media.rg, `Reference to undefined region: '${media.rg.$name}'.`)
+        )
       }
     }
   }
@@ -105,10 +104,12 @@ class SnclValidator extends ValidatorBase {
 
     // 1- Referencia do componente deve ter sido resolvida pelo Linker
     if (element.component.$ref === undefined) {
-      document.parseResult.errors.push({
-        message: `Reference to undefined media or context: '${element.component.$name}'.`,
-        location: element.component.location,
-      })
+      document.parseResult.errors.push(
+        makeValidationError(
+          element.component,
+          `Reference to undefined media or context: '${element.component.$name}'.`
+        )
+      )
     } else {
       // 2- Caso tenha sido encontrada, validar se a referência se encontra no mesmo contexto que o elemento
       let node: Port | Link
@@ -120,19 +121,23 @@ class SnclValidator extends ValidatorBase {
       }
 
       if (!isInSameContext(node, element.component.$ref)) {
-        document.parseResult.errors.push({
-          message: `Component '${element.component.$name}' is not in the same context.`,
-          location: element.component.location,
-        })
+        document.parseResult.errors.push(
+          makeValidationError(
+            element.component,
+            `Component '${element.component.$name}' is not in the same context.`
+          )
+        )
       }
     }
 
     // 3- Referencia da interface deve ter sido resolvida pelo Linker
     if (element.interface && element.interface.$ref === undefined) {
-      document.parseResult.errors.push({
-        message: `Reference to undefined interface: '${element.interface.$name}'.`,
-        location: element.interface.location,
-      })
+      document.parseResult.errors.push(
+        makeValidationError(
+          element.interface,
+          `Reference to undefined interface: '${element.interface.$name}'.`
+        )
+      )
     }
   }
 }

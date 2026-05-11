@@ -42,7 +42,7 @@ function validRef<T extends AstNodeWithName>(
     ...reference,
     $name: validValue(reference.$name, stack),
     // location: stack.rootCallLocation,
-    location: { ...reference.location },
+    callLocation: stack.rootCallLocation,
     isVirtual: true,
   }
 }
@@ -53,7 +53,7 @@ function resolvePort(port: Port, stack: MacroStack): Port {
     name: validValue(port.name, stack),
     component: validRef(port.component, stack),
     // location: stack.rootCallLocation,
-    location: { ...port.location },
+    callLocation: stack.rootCallLocation,
     isVirtual: true,
   }
 
@@ -69,7 +69,7 @@ function resolveArea(area: Area, stack: MacroStack): Area {
     ...area,
     name: validValue(area.name, stack),
     // location: stack.rootCallLocation,
-    location: { ...area.location },
+    callLocation: stack.rootCallLocation,
     isVirtual: true,
   }
 
@@ -83,7 +83,7 @@ function resolveMedia(media: Media, stack: MacroStack): Media {
     children: [],
     properties: [],
     // location: stack.rootCallLocation,
-    location: { ...media.location },
+    callLocation: stack.rootCallLocation,
     isVirtual: true,
   }
 
@@ -112,7 +112,7 @@ function resolveRegion(region: Region, stack: MacroStack): Region {
     name: validValue(region.name, stack),
     children: [],
     // location: stack.rootCallLocation,
-    location: { ...region.location },
+    callLocation: stack.rootCallLocation,
     isVirtual: true,
   }
 
@@ -166,7 +166,7 @@ function resolveContext(context: Context, stack: MacroStack): Context {
     name: validValue(context.name, stack),
     children: [],
     // location: stack.rootCallLocation,
-    location: { ...context.location },
+    callLocation: stack.rootCallLocation,
     isVirtual: true,
   }
 

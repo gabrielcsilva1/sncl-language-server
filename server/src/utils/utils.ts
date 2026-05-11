@@ -2,6 +2,7 @@ import type { ILexingError, IRecognitionException } from 'chevrotain'
 import { type Diagnostic, DiagnosticSeverity } from 'vscode-languageserver'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ValidationError } from '../parser/parser'
+import type { AstNode, Location } from '../syntax-tree'
 
 export function getValidationErrorsFromLexing(errors: ILexingError[]): ValidationError[] {
   const validationErrors: ValidationError[] = []
@@ -45,6 +46,24 @@ export function getValidationErrorFromParser(
   })
 
   return validationError
+}
+
+export function makeValidationError(node: AstNode, message: string): ValidationError {
+  let location: Location | undefined
+  /**
+   * Caso o elemento tenha sido gerado por uma macro, o erro é exibido
+   * na respectiva macroCall que gerou o elemento
+   *  */
+  if (node.isVirtual && node.callLocation) {
+    location = node.callLocation
+  } else {
+    location = node.location
+  }
+
+  return {
+    message,
+    location,
+  }
 }
 
 export function convertErrorToDiagnostic(

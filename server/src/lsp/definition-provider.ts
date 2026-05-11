@@ -4,6 +4,7 @@ import {
   type Location as VSCodeLocation,
 } from 'vscode-languageserver'
 import type { WorkspaceManager } from '../workspace/workspace-manager'
+import type { Location } from '../syntax-tree'
 
 export class DefinitionProvider {
   private workspaceManager: WorkspaceManager
@@ -21,6 +22,7 @@ export class DefinitionProvider {
 
     const offset = document.textDocument.offsetAt(position)
 
+    // Busca o elemento que está com o `hover`
     const reference = document.references.find(
       (r) => r.location.startOffset <= offset && r.location.endOffset >= offset
     )
@@ -29,8 +31,16 @@ export class DefinitionProvider {
       return null
     }
 
-    const startPos = document.textDocument.positionAt(reference.$ref.location.startOffset)
-    const endPos = document.textDocument.positionAt(reference.$ref.location.endOffset)
+    let location: Location | undefined
+    // Se a declaração original for um nó virtual, a definição aponta para a macroCall
+    if (reference.$ref.isVirtual && reference.$ref.callLocation) {
+      location = reference.$ref.callLocation
+    } else {
+      // Caso contrário, aponta para a declaração original
+      location = reference.$ref.location
+    }
+    const startPos = document.textDocument.positionAt(location.startOffset)
+    const endPos = document.textDocument.positionAt(location.endOffset)
 
     return {
       uri: document.textDocument.uri,

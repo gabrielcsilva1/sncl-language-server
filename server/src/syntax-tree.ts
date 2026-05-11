@@ -11,9 +11,20 @@ export interface AstNode {
    */
   $container?: AstNode
 
+  /**
+   * Indica se um elemento foi gerado a partir de uma macro
+   */
   isVirtual?: boolean
 
-  /** Localização de onde começa e termina nó */
+  /**
+   * Quando o elemento é gerado por uma macroCall (isVirtual = true), essa propriedade é
+   * preenchida com a mesma localização da respectiva macroCall.
+   */
+  callLocation?: Location
+
+  /**
+   * Localização de onde começa e termina nó no documento.
+   * */
   location: Location
 }
 
