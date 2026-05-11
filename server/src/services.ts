@@ -1,6 +1,7 @@
 import type { Connection } from 'vscode-languageserver'
 import { DefinitionProvider } from './lsp/definition-provider'
 import { DocumentUpdateHandler } from './lsp/document-update-handler'
+import { ReferenceProvider } from './lsp/reference-provider'
 import { RenameProvider } from './lsp/rename-provider'
 import { WorkspaceManager } from './workspace/workspace-manager'
 
@@ -12,6 +13,7 @@ export interface SnclServices {
     readonly DocumentUpdateHandler: DocumentUpdateHandler
     readonly DefinitionProvider: DefinitionProvider
     readonly RenameProvider: RenameProvider
+    readonly ReferenceProvider: ReferenceProvider
   }
 }
 
@@ -22,6 +24,7 @@ export function createSnclServices(): SnclServices {
   const documentUpdateHandler = new DocumentUpdateHandler(workspaceManager)
   const definitionProvider = new DefinitionProvider(workspaceManager)
   const renameProvider = new RenameProvider(workspaceManager)
+  const referenceProvider = new ReferenceProvider(workspaceManager)
 
   return {
     workspace: {
@@ -31,6 +34,7 @@ export function createSnclServices(): SnclServices {
       DocumentUpdateHandler: documentUpdateHandler,
       DefinitionProvider: definitionProvider,
       RenameProvider: renameProvider,
+      ReferenceProvider: referenceProvider,
     },
   }
 }
@@ -44,4 +48,7 @@ export function registerCapabilities(connection: Connection, services: SnclServi
   // rename
   connection.onPrepareRename((params) => services.lsp.RenameProvider.prepareRename(params))
   connection.onRenameRequest((parmas) => services.lsp.RenameProvider.rename(parmas))
+
+  // reference
+  connection.onReferences((params) => services.lsp.ReferenceProvider.findReferences(params))
 }

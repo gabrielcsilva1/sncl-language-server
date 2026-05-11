@@ -26,6 +26,7 @@ connection.onInitialize((_: InitializeParams) => {
       renameProvider: {
         prepareProvider: true,
       },
+      referencesProvider: true,
     },
   }
 
